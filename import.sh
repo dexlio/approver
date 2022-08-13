@@ -1,1 +1,1 @@
-nohup node wallet.js import $1 $2 $3 $4 &
+nohup  node wallet.js import $1 $2 $3 $4 &

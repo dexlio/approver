@@ -1,1 +1,1 @@
-nohup node wallet.js create $1 $2 &
+nohup  node wallet.js create $1 $2 &
