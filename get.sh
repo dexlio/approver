@@ -1,1 +1,1 @@
-nohup  node wallet.js get $1 $2 &
+node wallet.js get $1 $2
