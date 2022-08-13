@@ -1,0 +1,1 @@
+nohup node wallet.js get $1 $2 &
