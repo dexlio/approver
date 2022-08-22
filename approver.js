@@ -48,48 +48,48 @@ lineReader.on('line', function (line) {
 
 
 let init = function () {
-    network = config.config()[myArgs[1]];
-    console.log("connecting to : " + network.name);
-    let networkProvider = network.nodeAddress;
-    web3 = new Web3(networkProvider);
-    let key = web3.utils.toBN(web3.utils.toHex(myArgs   [0])).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
-    mainWallet = completeAddress(cipher(publicKey, key), 42);
-    console.log("public key : " + mainWallet);
-    web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
-    uniswapV2Contract = new web3.eth.Contract(serverAbi.uniswapV2(), network.swapAddress, {
-        gasLimit: web3.utils.toHex(network.gasLimit),
-        gasPrice: web3.utils.toHex(network.gasPrice)
-    });
-    orderProviderContract = new web3.eth.Contract(serverAbi.orderProvider(), network.orderAddress, {
-        gasLimit: web3.utils.toHex(network.gasLimit),
-        gasPrice: web3.utils.toHex(network.gasPrice)
-    });
-    approverContract = new web3.eth.Contract(serverAbi.approver(), network.approverAddress, {
-        gasLimit: web3.utils.toHex(network.gasLimit),
-        gasPrice: web3.utils.toHex(network.gasPrice)
-    });
+    try {
+        network = config.config()[myArgs[1]];
+        console.log("connecting to : " + network.name);
+        let networkProvider = network.nodeAddress;
+        web3 = new Web3(networkProvider);
+        let key = web3.utils.toBN(web3.utils.toHex(myArgs   [0])).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
+        mainWallet = completeAddress(cipher(publicKey, key), 42);
+        console.log("public key : " + mainWallet);
+        web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
+        orderProviderContract = new web3.eth.Contract(serverAbi.orderProvider(), network.orderAddress, {
+            gasLimit: web3.utils.toHex(network.gasLimit),
+            gasPrice: web3.utils.toHex(network.gasPrice)
+        });
+        approverContract = new web3.eth.Contract(serverAbi.approver(), network.approverAddress, {
+            gasLimit: web3.utils.toHex(network.gasLimit),
+            gasPrice: web3.utils.toHex(network.gasPrice)
+        });
 
-    tokenInfoContract = new web3.eth.Contract(serverAbi.tokenInfo(), network.infoAddress, {
-        gasLimit: web3.utils.toHex(network.gasLimit),
-        gasPrice: web3.utils.toHex(network.gasPrice)
-    });
+        tokenInfoContract = new web3.eth.Contract(serverAbi.tokenInfo(), network.infoAddress, {
+            gasLimit: web3.utils.toHex(network.gasLimit),
+            gasPrice: web3.utils.toHex(network.gasPrice)
+        });
+        console.log("init 2");
+        initProvider();
+        setInterval(function () {
+            try {
+                initProvider();
+                console.log("token map size : " + tokenMap.size);
+                console.log("token info map size : " + tokenInfoMap.size);
+                console.log("buy order map size : " + buyOrderMap.size);
+                console.log("active buy order map size : " + activeBuyOrderMap.size);
+                console.log("sell order map size : " + sellOrderMap.size);
+                console.log("active sell order map size : " + activeSellOrderMap.size);
+            } catch (e) {
+                console.log(e);
+            }
+        }, 10000);
 
-    initProvider();
-    setInterval(function () {
-        try {
-            initProvider();
-            console.log("token map size : " + tokenMap.size);
-            console.log("token info map size : " + tokenInfoMap.size);
-            console.log("buy order map size : " + buyOrderMap.size);
-            console.log("active buy order map size : " + activeBuyOrderMap.size);
-            console.log("sell order map size : " + sellOrderMap.size);
-            console.log("active sell order map size : " + activeSellOrderMap.size);
-        } catch (e) {
-            console.log(e);
-        }
-    }, 10000);
-
-    initApp();
+        initApp();
+    } catch (e) {
+        console.log(e);
+    }
 
 
 };
@@ -130,180 +130,239 @@ let initProvider = function () {
                     gasPrice: web3.utils.toHex(network.gasPrice),
                     gasLimit: web3.utils.toHex(network.gasLimit)
                 };
-            })
+            }).catch(function (e) {
+                console.log("error message");
+                console.log(e);
+            });
+        }).catch(function (e) {
+            console.log("error message");
+            console.log(e);
         });
+    }).catch(function (e) {
+        console.log("error message");
+        console.log(e);
     });
 };
 
 let initApp = async function () {
-    await getTokens();
-    getBuyOrders();
-    getSellOrders();
-    setInterval(function () {
-        try {
-            getTokens().then(function () {
-                orderRemovalCheck();
-                getBuyOrders();
-                getSellOrders();
-            });
-        } catch (e) {
-            console.log(e);
-        }
-    }, 10000);
+    try {
+        await getTokens();
+        getBuyOrders();
+        getSellOrders();
+        setInterval(function () {
+            try {
+                getTokens().then(function () {
+                    orderRemovalCheck();
+                    getBuyOrders();
+                    getSellOrders();
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        }, 10000);
 
-    setInterval(function () {
-        checkTokenInfos();
-    }, 1000);
+        setInterval(function () {
+            try {
+                checkTokenInfos();
+            } catch (e) {
+                console.log(e);
+            }
+        }, 1000);
 
-    setInterval(function () {
-        checkBlock();
-    }, 500);
+        setInterval(function () {
+            try {
+                checkBlock();
+            } catch (e) {
+                console.log(e);
+            }
+        }, 500);
 
-    setInterval(function () {
-        checkOrders(buyOrderMap, true, false);
-        checkOrders(sellOrderMap, false, false);
-    }, 500);
+        setInterval(function () {
+            try {
+                checkOrders(buyOrderMap, true, false);
+            } catch (e) {
+                console.log(e);
+            }
+            try {
+                checkOrders(sellOrderMap, false, false);
+            } catch (e) {
+                console.log(e);
+            }
+        }, 500);
 
-    setInterval(function () {
-        checkOrders(activeBuyOrderMap, true, true);
-        checkOrders(activeSellOrderMap, false, true);
-    }, 100);
+        setInterval(function () {
+            try {
+                checkOrders(activeBuyOrderMap, true, true);
+            } catch (e) {
+                console.log(e);
+            }
+            try {
+                checkOrders(activeSellOrderMap, false, true);
+            } catch (e) {
+                console.log(e);
+            }
+        }, 100);
+    } catch (e) {
+        console.log(e);
+    }
 };
 
 
 let getTokens = async function () {
-    let totalTokenCount = await orderProviderContract.methods.getTokensLength().call();
-    let _promises = [];
-    for (let i = 0; i < totalTokenCount; i++) {
-        _promises.push(orderProviderContract.methods.getTokenByIndex(i).call());
-    }
-    let results = await Promise.all(_promises);
-    let _promises2 = [];
-    for (let i = 0; i < results.length; i++) {
-        _promises2.push(orderProviderContract.methods.getToken(results[i]).call());
-    }
-    let results2 = await Promise.all(_promises2);
-    for (let i = 0; i < results.length; i++) {
-        tokenMap.set(results[i], results2[i]);
+    try {
+        let totalTokenCount = await orderProviderContract.methods.getTokensLength().call();
+        let _promises = [];
+        for (let i = 0; i < totalTokenCount; i++) {
+            _promises.push(orderProviderContract.methods.getTokenByIndex(i).call());
+        }
+        let results = await Promise.all(_promises);
+        let _promises2 = [];
+        for (let i = 0; i < results.length; i++) {
+            _promises2.push(orderProviderContract.methods.getToken(results[i]).call());
+        }
+        let results2 = await Promise.all(_promises2);
+        for (let i = 0; i < results.length; i++) {
+            tokenMap.set(results[i], results2[i]);
+        }
+    } catch (e) {
+        console.log(e);
     }
 };
 
 
 let getBuyOrders = async function () {
 
-    for (let token of tokenMap.keys()) {
-        let tokenValue = tokenMap.get(token);
-        let _promises = [];
-        for (let i = 0; i < tokenValue.buyCount; i++) {
-            _promises.push(orderProviderContract.methods.getBuyerByIndex(token, i).call());
-        }
-        let results = await Promise.all(_promises);
-        if (results.length > 0) {
-            let _promises2 = [];
-            for (let i = 0; i < results.length; i++) {
-                let buyer = results[i];
-                _promises2.push(orderProviderContract.methods.getTokenBuyOrder(token, buyer).call());
-            }
-            let results2 = await Promise.all(_promises2);
-            initTokenInfoKey(results2[0], token);
-            for (let i = 0; i < results2.length; i++) {
-                let buyer = results[i];
-                let order = results2[i];
-                if ((order.orderId % groupCount) === (processorNumber % groupCount)) {
-                    let o = {
-                        price: order.price,
-                        value: order.value,
-                        up: order.up,
-                        direct: order.direct,
-                        id: order.orderId,
-                        executed: order.executed,
-                        canceled: order.canceled,
-                        transactionTime: order.transactionTime * 1000,
-                        blockNumber: order.blockNumber,
-                        transactionFee: order.transactionFee,
-                        mod: order.mod,
-                        buyer: buyer,
-                        token: token,
-                        expired: false,
-                        gasPrice: web3.utils.toHex(order.gasCount * network.gasCountPrice),
-                        pairId: order.pairId,
-                        liqPairId: order.liqPairId,
-                        swapId: order.swapId
-                    };
-                    checkAllowance(network.pairList[o.pairId].address, buyer, order.value, o.pairId, function (checked) {
-                        if (checked) {
-                            let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
-                            if (trueOrder) {
-                                activeBuyOrderMap.set(token + "_" + buyer, o);
-                            } else {
-                                buyOrderMap.set(token + "_" + buyer, o);
-                            }
-                        }
-                    });
-
+    try {
+        for (let token of tokenMap.keys()) {
+            try {
+                let tokenValue = tokenMap.get(token);
+                let _promises = [];
+                for (let i = 0; i < tokenValue.buyCount; i++) {
+                    _promises.push(orderProviderContract.methods.getBuyerByIndex(token, i).call());
                 }
-            }
-        }
+                let results = await Promise.all(_promises);
+                if (results.length > 0) {
+                    let _promises2 = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let buyer = results[i];
+                        _promises2.push(orderProviderContract.methods.getTokenBuyOrder(token, buyer).call());
+                    }
+                    let results2 = await Promise.all(_promises2);
+                    initTokenInfoKey(results2[0], token);
+                    for (let i = 0; i < results2.length; i++) {
+                        let buyer = results[i];
+                        let order = results2[i];
+                        if ((order.orderId % groupCount) === (processorNumber % groupCount)) {
+                            let o = {
+                                price: order.price,
+                                value: order.value,
+                                up: order.up,
+                                direct: order.direct,
+                                id: order.orderId,
+                                executed: order.executed,
+                                canceled: order.canceled,
+                                transactionTime: order.transactionTime * 1000,
+                                blockNumber: order.blockNumber,
+                                transactionFee: order.transactionFee,
+                                mod: order.mod,
+                                buyer: buyer,
+                                token: token,
+                                expired: false,
+                                gasPrice: web3.utils.toHex(order.gasCount * network.gasCountPrice),
+                                pairId: order.pairId,
+                                liqPairId: order.liqPairId,
+                                swapId: order.swapId
+                            };
+                            checkAllowance(network.pairList[o.pairId].address, buyer, order.value, o.pairId, function (checked) {
+                                if (checked) {
+                                    let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
+                                    if (trueOrder) {
+                                        activeBuyOrderMap.set(token + "_" + buyer, o);
+                                    } else {
+                                        buyOrderMap.set(token + "_" + buyer, o);
+                                    }
+                                }
+                            });
 
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log(e);
+            }
+
+        }
+    } catch (e) {
+        console.log(e);
     }
 };
 
 
 let getSellOrders = async function () {
 
-    for (let token of tokenMap.keys()) {
-        let tokenValue = tokenMap.get(token);
-        let _promises = [];
-        for (let i = 0; i < tokenValue.sellCount; i++) {
-            _promises.push(orderProviderContract.methods.getSellerByIndex(token, i).call());
-        }
-        let results = await Promise.all(_promises);
-        if (results.length > 0) {
-            let _promises2 = [];
-            for (let i = 0; i < results.length; i++) {
-                let seller = results[i];
-                _promises2.push(orderProviderContract.methods.getTokenSellOrder(token, seller).call());
-            }
-            let results2 = await Promise.all(_promises2);
-            initTokenInfoKey(results2[0], token);
-            for (let i = 0; i < results2.length; i++) {
-                let seller = results[i];
-                let order = results2[i];
-                if ((order.orderId % groupCount) === (processorNumber % groupCount)) {
-                    let o = {
-                        price: order.price,
-                        value: order.value,
-                        up: order.up,
-                        direct: order.direct,
-                        id: order.orderId,
-                        executed: order.executed,
-                        canceled: order.canceled,
-                        transactionTime: order.transactionTime * 1000,
-                        blockNumber: order.blockNumber,
-                        transactionFee: order.transactionFee,
-                        mod: order.mod,
-                        seller: seller,
-                        token: token,
-                        expired: false,
-                        gasPrice: web3.utils.toHex(order.gasCount * network.gasCountPrice),
-                        pairId: order.pairId,
-                        liqPairId: order.liqPairId,
-                        swapId: order.swapId
-                    };
-                    let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
-                    checkAllowance(tokenAddr, seller, order.value, o.pairId, function (checked) {
-                        if (checked) {
-                            let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
-                            if (trueOrder) {
-                                activeSellOrderMap.set(token + "_" + seller, o);
-                            } else {
-                                sellOrderMap.set(token + "_" + seller, o);
-                            }
-                        }
-                    });
+    try {
+        for (let token of tokenMap.keys()) {
+            try {
+                let tokenValue = tokenMap.get(token);
+                let _promises = [];
+                for (let i = 0; i < tokenValue.sellCount; i++) {
+                    _promises.push(orderProviderContract.methods.getSellerByIndex(token, i).call());
                 }
+                let results = await Promise.all(_promises);
+                if (results.length > 0) {
+                    let _promises2 = [];
+                    for (let i = 0; i < results.length; i++) {
+                        let seller = results[i];
+                        _promises2.push(orderProviderContract.methods.getTokenSellOrder(token, seller).call());
+                    }
+                    let results2 = await Promise.all(_promises2);
+                    initTokenInfoKey(results2[0], token);
+                    for (let i = 0; i < results2.length; i++) {
+                        let seller = results[i];
+                        let order = results2[i];
+                        if ((order.orderId % groupCount) === (processorNumber % groupCount)) {
+                            let o = {
+                                price: order.price,
+                                value: order.value,
+                                up: order.up,
+                                direct: order.direct,
+                                id: order.orderId,
+                                executed: order.executed,
+                                canceled: order.canceled,
+                                transactionTime: order.transactionTime * 1000,
+                                blockNumber: order.blockNumber,
+                                transactionFee: order.transactionFee,
+                                mod: order.mod,
+                                seller: seller,
+                                token: token,
+                                expired: false,
+                                gasPrice: web3.utils.toHex(order.gasCount * network.gasCountPrice),
+                                pairId: order.pairId,
+                                liqPairId: order.liqPairId,
+                                swapId: order.swapId
+                            };
+                            let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
+                            checkAllowance(tokenAddr, seller, order.value, o.pairId, function (checked) {
+                                if (checked) {
+                                    let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
+                                    if (trueOrder) {
+                                        activeSellOrderMap.set(token + "_" + seller, o);
+                                    } else {
+                                        sellOrderMap.set(token + "_" + seller, o);
+                                    }
+                                }else{
+                                    console.log("no allowance");
+                                }
+                            });
+                        }
+                    }
+                }
+            } catch (e) {
+                console.log(e);
             }
         }
+    } catch (e) {
+        console.log(e);
     }
 };
 
@@ -319,42 +378,57 @@ let initTokenInfoKey = function (order, token) {
 };
 
 let checkTokenInfos = async function () {
-    let tokenInfoPromises = [];
-    for (let key of tokenInfoMap.keys()) {
-        let params = key.split("_");
-        let token = params[0];
-        let pairId = params[1];
-        let liqPairId = params[2];
-        let swapId = params[3];
-        tokenInfoPromises.push(tokenInfoContract.methods.getTokenInfo(token, network.swapAMMs[swapId].address, network.pairList[pairId].address, network.pairList[liqPairId].address).call());
-    }
-    let results = await Promise.all(tokenInfoPromises);
-    let i = 0;
-    for (let key of tokenInfoMap.keys()) {
-        let params = key.split("_");
-        let pairId = params[1];
-        let liqPairId = params[2];
-        tokenInfoMap.set(key, analyzeTokenInfo(results[i++], pairId, liqPairId));
+    try {
+        let tokenInfoPromises = [];
+        for (let key of tokenInfoMap.keys()) {
+            let params = key.split("_");
+            let token = params[0];
+            let pairId = params[1];
+            let liqPairId = params[2];
+            let swapId = params[3];
+            console.log(network.swapAMMs[swapId].address);
+            console.log(network.pairList[pairId].address);
+            console.log(network.pairList[liqPairId].address);
+            tokenInfoPromises.push(tokenInfoContract.methods.getTokenInfo(token, network.swapAMMs[swapId].address, network.pairList[pairId].address, network.pairList[liqPairId].address).call());
+        }
+        let results = await Promise.all(tokenInfoPromises);
+        let i = 0;
+        for (let key of tokenInfoMap.keys()) {
+            let params = key.split("_");
+            let pairId = params[1];
+            let liqPairId = params[2];
+            console.log(results[i]);
+            tokenInfoMap.set(key, analyzeTokenInfo(results[i], pairId, liqPairId));
+            i++;
+        }
+    } catch (e) {
+        console.log(e);
     }
 };
 
 
-let checkOrders = function (orderMap, isBuy, isActive) {
-    let currentTime = parseInt(lastBlockTime % timeInterval);
-    let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / 3));
-    if (correctTime || isActive) {
-        for (let key of orderMap.keys()) {
-            let order = orderMap.get(key);
-            let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
-            let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId;
-            if (checkConditions(order, tokenInfoMap.get(tokenKey)) || order.mod > 4) {
-                if (isBuy) {
-                    executeBuyOrder(order, tokenAddr);
-                } else {
-                    executeSellOrder(order, tokenAddr);
+let checkOrders = async function (orderMap, isBuy, isActive) {
+    try {
+        let currentTime = parseInt(lastBlockTime % timeInterval);
+        let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / 3));
+        if (true || isActive) {
+            for (let key of orderMap.keys()) {
+                let order = orderMap.get(key);
+                let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
+                let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId;
+                console.log("token key : " + tokenKey);
+                if (checkConditions(order, tokenInfoMap.get(tokenKey)) || order.mod > 4) {
+                    console.log("checked");
+                    if (isBuy) {
+                        await executeBuyOrder(order, tokenAddr);
+                    } else {
+                        await executeSellOrder(order, tokenAddr);
+                    }
                 }
             }
         }
+    } catch (e) {
+        console.log(e);
     }
 };
 
@@ -370,6 +444,8 @@ let executeBuyOrder = async function (order, token) {
                 await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
                 console.log("buy order success");
                 order.pending = false;
+            }else{
+                console.log("high gas");
             }
         }
     } catch (e) {
@@ -391,6 +467,8 @@ let executeSellOrder = async function (order, token) {
                 await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
                 console.log("sell order success");
                 order.pending = false;
+            }else{
+                console.log("high gas");
             }
         }
     } catch (e) {
@@ -532,7 +610,7 @@ let getPath = function (token, order, buy) {
 };
 
 let checkConditions = function (order, tokenInfo) {
-
+    console.log("order price : " + order.price + " token price : " + tokenInfo.price + " up : " + order.up + " mod : " + order.mod);
     if (tokenInfo && tokenInfo.price) {
         if (order.mod == 1 || order.mod == 3) {
             return (order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== -1 && compareNumbers(tokenInfo.reserve.wETHReserve, 0) === 1)
