@@ -70,7 +70,6 @@ let init = function () {
             gasLimit: web3.utils.toHex(network.gasLimit),
             gasPrice: web3.utils.toHex(network.gasPrice)
         });
-        console.log("init 2");
         initProvider();
         setInterval(function () {
             try {
@@ -386,9 +385,6 @@ let checkTokenInfos = async function () {
             let pairId = params[1];
             let liqPairId = params[2];
             let swapId = params[3];
-            console.log(network.swapAMMs[swapId].address);
-            console.log(network.pairList[pairId].address);
-            console.log(network.pairList[liqPairId].address);
             tokenInfoPromises.push(tokenInfoContract.methods.getTokenInfo(token, network.swapAMMs[swapId].address, network.pairList[pairId].address, network.pairList[liqPairId].address).call());
         }
         let results = await Promise.all(tokenInfoPromises);
@@ -397,7 +393,6 @@ let checkTokenInfos = async function () {
             let params = key.split("_");
             let pairId = params[1];
             let liqPairId = params[2];
-            console.log(results[i]);
             tokenInfoMap.set(key, analyzeTokenInfo(results[i], pairId, liqPairId));
             i++;
         }
@@ -411,14 +406,12 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
         let currentTime = parseInt(lastBlockTime % timeInterval);
         let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / 3));
-        if (true || isActive) {
+        if (correctTime || isActive) {
             for (let key of orderMap.keys()) {
                 let order = orderMap.get(key);
                 let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
                 let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId;
-                console.log("token key : " + tokenKey);
                 if (checkConditions(order, tokenInfoMap.get(tokenKey)) || order.mod > 4) {
-                    console.log("checked");
                     if (isBuy) {
                         await executeBuyOrder(order, tokenAddr);
                     } else {
@@ -610,7 +603,6 @@ let getPath = function (token, order, buy) {
 };
 
 let checkConditions = function (order, tokenInfo) {
-    console.log("order price : " + order.price + " token price : " + tokenInfo.price + " up : " + order.up + " mod : " + order.mod);
     if (tokenInfo && tokenInfo.price) {
         if (order.mod == 1 || order.mod == 3) {
             return (order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== -1 && compareNumbers(tokenInfo.reserve.wETHReserve, 0) === 1)
