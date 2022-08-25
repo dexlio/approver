@@ -90,7 +90,7 @@ var networkConfig = [
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",
         orderAddress: "0x44Bf22F5d88569Ae5a2442a3F2C7A9E63A8fFb13",
         approverAddress: "0x36c4feD51f53c4B3442898fD0eb4ccAa009287eE",
-        infoAddress: "0xADA68bBF3B32D973f059cE7f3104f55a86CC3006",
+        infoAddress: "0x3CBBB0F5cbb6405229E9ab0b5ABe2Ed3d52Ea828",
         wETHAddress: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
         usdAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         scanAddress: "https://polygonscan.com/",
