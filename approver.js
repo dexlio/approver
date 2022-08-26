@@ -278,6 +278,7 @@ let getBuyOrders = async function () {
                                     if (trueOrder) {
                                         activeBuyOrderMap.set(token + "_" + buyer, o);
                                     } else {
+
                                         buyOrderMap.set(token + "_" + buyer, o);
                                     }
                                 }
@@ -434,6 +435,7 @@ let executeBuyOrder = async function (order, token) {
             let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
             if((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                 order.executed = true;
+                console.log(order);
                 await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
                 console.log("buy order success");
                 order.pending = false;
@@ -457,6 +459,7 @@ let executeSellOrder = async function (order, token) {
             let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
             if((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1){
                 order.executed = true;
+                console.log(order);
                 await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
                 console.log("sell order success");
                 order.pending = false;
