@@ -141,7 +141,7 @@ var networkConfig = [
         usdSymbol: "USDC",
         blockInterval: 3,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
-        orderAddress: "0x4b68F78C40E31160Fa48f949C74E9574669f0407",
+        orderAddress: "0xd502f168498db348000aBFaaaca7dF3109e68a12",
         approverAddress: "0x72A6C9EF266D764a2C1e61358c693f911800Afc9",
         infoAddress: "0xF67428189f27E36425572EF4a715E1B6B9078153",
         wETHAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",

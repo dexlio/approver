@@ -251,7 +251,7 @@ let getBuyOrders = async function () {
                     for (let i = 0; i < results2.length; i++) {
                         let buyer = results[i];
                         let order = results2[i];
-                        if ((order.orderId % groupCount) === (processorNumber % groupCount)) {
+                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
@@ -320,7 +320,7 @@ let getSellOrders = async function () {
                     for (let i = 0; i < results2.length; i++) {
                         let seller = results[i];
                         let order = results2[i];
-                        if ((order.orderId % groupCount) === (processorNumber % groupCount)) {
+                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
