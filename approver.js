@@ -210,6 +210,7 @@ let initApp = async function () {
 let getTokens = async function () {
     try {
         let totalTokenCount = await orderProviderContract.methods.getTokensLength().call();
+        console.log(totalTokenCount);
         let _promises = [];
         for (let i = 0; i < totalTokenCount; i++) {
             _promises.push(orderProviderContract.methods.getTokenByIndex(i).call());
@@ -251,6 +252,7 @@ let getBuyOrders = async function () {
                     for (let i = 0; i < results2.length; i++) {
                         let buyer = results[i];
                         let order = results2[i];
+                        console.log(order);
                         if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled) {
                             let o = {
                                 price: order.price,

@@ -88,7 +88,7 @@ var networkConfig = [
         usdSymbol: "USDT",
         blockInterval: 4,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",
-        orderAddress: "0x060B5a7C9902fc95312E28265B14c494fCa2D9D5",
+        orderAddress: "0xd502f168498db348000aBFaaaca7dF3109e68a12",
         approverAddress: "0xEBB3942AFd11418fD6f08F217D14860B023648c1",
         infoAddress: "0x3CBBB0F5cbb6405229E9ab0b5ABe2Ed3d52Ea828",
         wETHAddress: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",

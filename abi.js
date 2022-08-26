@@ -97,34 +97,6 @@ var orderProviderAbi = [
     {
         "inputs": [
             {
-                "internalType": "uint256",
-                "name": "trueApproverMemberId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "bool",
-                "name": "isTrueApprover",
-                "type": "bool"
-            },
-            {
-                "internalType": "uint256",
-                "name": "oId",
-                "type": "uint256"
-            },
-            {
-                "internalType": "uint256",
-                "name": "maxProcessorNumber",
-                "type": "uint256"
-            }
-        ],
-        "name": "checkApprover",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "address",
                 "name": "token",
                 "type": "address"
@@ -248,6 +220,34 @@ var orderProviderAbi = [
     {
         "inputs": [
             {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "seller",
+                "type": "address"
+            },
+            {
+                "internalType": "address[]",
+                "name": "path",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint32",
+                "name": "pairId",
+                "type": "uint32"
+            }
+        ],
+        "name": "sellOrderExecute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
                 "internalType": "address payable",
                 "name": "_consumerAddress",
                 "type": "address"
@@ -289,34 +289,6 @@ var orderProviderAbi = [
         ],
         "name": "OwnershipTransferred",
         "type": "event"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "seller",
-                "type": "address"
-            },
-            {
-                "internalType": "address[]",
-                "name": "path",
-                "type": "address[]"
-            },
-            {
-                "internalType": "uint32",
-                "name": "pairId",
-                "type": "uint32"
-            }
-        ],
-        "name": "sellOrderExecute",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
     },
     {
         "inputs": [
@@ -830,7 +802,7 @@ var orderProviderAbi = [
         "stateMutability": "view",
         "type": "function"
     }
-]
+];
 
 const approverAbi = [
     {
