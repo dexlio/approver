@@ -158,7 +158,7 @@ let initApp = async function () {
             } catch (e) {
                 console.log(e);
             }
-        }, 10000);
+        }, 2000);
 
         setInterval(function () {
             try {
@@ -187,7 +187,7 @@ let initApp = async function () {
             } catch (e) {
                 console.log(e);
             }
-        }, 500);
+        }, 1000);
 
         setInterval(function () {
             try {
@@ -406,7 +406,7 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
         let currentTime = parseInt(lastBlockTime % timeInterval);
         let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / 3));
-        if (correctTime || isActive) {
+        if (isActive || correctTime) {
             for (let key of orderMap.keys()) {
                 let order = orderMap.get(key);
                 let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
