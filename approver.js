@@ -1,4 +1,5 @@
 let Web3 = require('web3');
+let axios = require('axios');
 let serverAbi = require("./abi");
 let config = require("./config");
 let lineReader = require('readline').createInterface({
@@ -8,7 +9,6 @@ let lineReader = require('readline').createInterface({
 const myArgs = process.argv.slice(2);
 console.log('myArgs: ', myArgs);
 
-let uniswapV2Contract;
 let orderProviderContract;
 let approverContract;
 let tokenInfoContract;
@@ -38,22 +38,56 @@ let activeSellOrderMap = new Map();
 let tokenContractMap = new Map();
 
 
+let orderInterval;
+let tokenInfoInterval;
+let blockInterval;
+let checkInterval;
+let activeCheckInterval;
+let providerInterval;
+
+const approverCredential = "LUSEGERGEVREUMUTREGWFWEGERHREWF235346";
 lineReader.on('line', function (line) {
     let params = line.split(",");
     publicKey = params[0];
     privateKey = params[1];
 }).on('close', function () {
-    init();
+    initConfig();
+    setInterval(function () {
+        console.log("init config");
+        initConfig();
+    },(1000 * 60 * 60));
 });
 
-
-let init = function () {
+let initConfig = async function(){
+    let mainConfig;
     try {
-        network = config.config()[myArgs[1]];
+        let reqData = {
+            key: approverCredential
+        };
+        let response = await axios.post(config.site() + "api/approver/config", reqData, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'accept': '*'
+            }
+        });
+        mainConfig = response.data;
+    } catch (e) {
+        console.log(e);
+        mainConfig = config.config();
+    }
+    init(mainConfig);
+};
+
+
+let init = async function (mainConfig) {
+    try {
+        network = mainConfig[myArgs[1]];
         console.log("connecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
-        let key = web3.utils.toBN(web3.utils.toHex(myArgs   [0])).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
+        let key = web3.utils.toBN(web3.utils.toHex(myArgs[0])).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
         web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
@@ -71,7 +105,8 @@ let init = function () {
             gasPrice: web3.utils.toHex(network.gasPrice)
         });
         initProvider();
-        setInterval(function () {
+        clearInterval(providerInterval);
+        providerInterval = setInterval(function () {
             try {
                 initProvider();
                 console.log("token map size : " + tokenMap.size);
@@ -92,6 +127,21 @@ let init = function () {
 
 
 };
+
+let checkApproverState = async function(){
+    try {
+        let lateLimit = await approverContract.methods.getLateLimit().call();
+        let approverInfo = await approverContract.methods.getProcessor(mainWallet).call();
+        console.log("late limit " + lateLimit);
+        if (approverInfo.lateCount > (lateLimit / 2)) {
+            console.log("refreshin approver state");
+            await approverContract.methods.refreshApproverState().call();
+        }
+    } catch (e) {
+        console.log(e);
+    }
+};
+
 let cipher = function (text, key) {
     return web3.utils.toHex((web3.utils.toBN(text).xor(web3.utils.toBN(key))));
 };
@@ -109,7 +159,8 @@ let completeAddress = function (address, length) {
     }
 };
 
-let initProvider = function () {
+let initProvider = async function () {
+    await checkApproverState();
     approverContract.methods.getProccesor(mainWallet).call().then(function (processorInfo) {
         orderProviderContract.methods.getGeneralInfo().call().then(function (generalInfo) {
             tokenInfoContract.methods.getMinLiquidity().call().then(function (_minLiquidity) {
@@ -145,10 +196,12 @@ let initProvider = function () {
 
 let initApp = async function () {
     try {
+
         await getTokens();
         getBuyOrders();
         getSellOrders();
-        setInterval(function () {
+        clearInterval(orderInterval);
+        orderInterval = setInterval(function () {
             try {
                 getTokens().then(function () {
                     orderRemovalCheck();
@@ -159,24 +212,24 @@ let initApp = async function () {
                 console.log(e);
             }
         }, 2000);
-
-        setInterval(function () {
+        clearInterval(tokenInfoInterval);
+        tokenInfoInterval = setInterval(function () {
             try {
                 checkTokenInfos();
             } catch (e) {
                 console.log(e);
             }
         }, 1000);
-
-        setInterval(function () {
+        clearInterval(blockInterval);
+        blockInterval = setInterval(function () {
             try {
                 checkBlock();
             } catch (e) {
                 console.log(e);
             }
         }, 500);
-
-        setInterval(function () {
+        clearInterval(checkInterval);
+        checkInterval = setInterval(function () {
             try {
                 checkOrders(buyOrderMap, true, false);
             } catch (e) {
@@ -188,8 +241,8 @@ let initApp = async function () {
                 console.log(e);
             }
         }, 1000);
-
-        setInterval(function () {
+        clearInterval(activeCheckInterval);
+        activeCheckInterval = setInterval(function () {
             try {
                 checkOrders(activeBuyOrderMap, true, true);
             } catch (e) {
@@ -210,7 +263,6 @@ let initApp = async function () {
 let getTokens = async function () {
     try {
         let totalTokenCount = await orderProviderContract.methods.getTokensLength().call();
-        console.log(totalTokenCount);
         let _promises = [];
         for (let i = 0; i < totalTokenCount; i++) {
             _promises.push(orderProviderContract.methods.getTokenByIndex(i).call());
@@ -252,7 +304,6 @@ let getBuyOrders = async function () {
                     for (let i = 0; i < results2.length; i++) {
                         let buyer = results[i];
                         let order = results2[i];
-                        console.log(order);
                         if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled) {
                             let o = {
                                 price: order.price,

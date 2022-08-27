@@ -1191,7 +1191,7 @@ const approverAbi = [
         "stateMutability": "nonpayable",
         "type": "function"
     }
-];
+]
 
 const tokenInfoAbi = [
     {

@@ -4,6 +4,9 @@ module.exports = {
     },
     salt:function () {
         return salt;
+    },
+    site : function () {
+        return "http://localhost:9094/"
     }
 };
 
@@ -22,10 +25,10 @@ var networkConfig = [
         approveLimit:44222,
         usdSymbol:"BUSD",
         swapAddress:"0x10ed43c718714eb63d5aa57b78b54704e256024e",
-        orderAddress: "0x1DB527E15caa4a528A99a66ba38698084fb8bbe9",
+        orderAddress: "0x14cbD76fE129e1e523B42b30C05347C983bD5Daa",
         wETHAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
-        approverAddress: "0xDEF399AFe9553177071b57946c10D761fDDB73e4",
-        infoAddress: "0x8359Ad9C620C9a33294a7a1dEAc425ad8Ffc02b6",
+        approverAddress: "0x4F83C5F3b9853bfbbeBC997d9982ab7677032A5c",
+        infoAddress: "0x30eaB84e2B69BcD89C58174743984EC52aC1dA3c",
         usdAddress:"0xe9e7cea3dedca5984780bafc599bd69add087d56",
         scanAddress:"https://bscscan.com/",
         nodeAddress:"https://bsc-dataseed.binance.org/",
@@ -48,12 +51,6 @@ var networkConfig = [
                 site:"https://exchange.biswap.org/swap?outputCurrency=",
                 logo:"https://biswap.org/logo.png"
             }
-            // {
-            //     name:"PancakeSwap V1",
-            //     address:"0x05ff2b0db69458a0750badebc4f9e13add608c7f",
-            //     site:"https://pancakeswap.finance/swap?outputCurrency=",
-            //     logo:"https://raw.githubusercontent.com/trustwallet/assets/master/dapps/exchange.pancakeswap.finance.png"
-            // }
         ],
         pairList: [
             {
@@ -71,6 +68,10 @@ var networkConfig = [
             }, {
                 symbol:'USDT',
                 address:'0x55d398326f99059fF775485246999027B3197955',
+                decimal:18
+            },{
+                symbol:'WBNB',
+                address:'0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c',
                 decimal:18
             }
         ]
