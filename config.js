@@ -141,8 +141,8 @@ var networkConfig = [
         usdSymbol: "USDC",
         blockInterval: 3,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
-        orderAddress: "0xd502f168498db348000aBFaaaca7dF3109e68a12",
-        approverAddress: "0x72A6C9EF266D764a2C1e61358c693f911800Afc9",
+        orderAddress: "0x638f95547C0f4586316d5A716989E910093Cf4aA",
+        approverAddress: "0xE7abB1181A8b602dCDd92dC0deF2394Dd010b74B",
         infoAddress: "0xF67428189f27E36425572EF4a715E1B6B9078153",
         wETHAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
         usdAddress: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
@@ -176,6 +176,14 @@ var networkConfig = [
                 symbol:'USDCE',
                 address:'0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664',
                 decimal:6
+            }, {
+                symbol:'USDT',
+                address:'0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7',
+                decimal:6
+            }, {
+                symbol:'WAVAX',
+                address:'0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7',
+                decimal:18
             }
         ]
     }
