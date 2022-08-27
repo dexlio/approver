@@ -6,7 +6,7 @@ module.exports = {
         return salt;
     },
     site : function () {
-        return "http://localhost:9094/"
+        return "http://dexhub.ml/"
     }
 };
 
