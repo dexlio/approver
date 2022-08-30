@@ -608,7 +608,7 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
             }
         } else {
             let o = await orderProviderContract.methods.getTokenSellOrder(order.token, order.seller).call();
-            let allowance = await checkAllowance(order.token, order.buyer, order.value, o.pairId);
+            let allowance = await checkAllowance(order.token, order.seller, order.value, o.pairId);
             if (o.executed || o.canceled || o.orderId != id || !allowance) {
                 orderMap.delete(orderKey);
             }
@@ -650,7 +650,7 @@ let checkAllowance = async function (token, user, value, pairId) {
             }
             let balance = await tokenContract.methods.balanceOf(user).call();
             if (web3.utils.toBN(balance).cmp(web3.utils.toBN(value)) !== -1) {
-                let allowance = tokenContract.methods.allowance(user, network.orderAddress).call();
+                let allowance = await tokenContract.methods.allowance(user, network.orderAddress).call();
                 return web3.utils.toBN(allowance).cmp(web3.utils.toBN(value)) !== -1;
             } else {
                 return false;
