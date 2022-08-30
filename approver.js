@@ -331,7 +331,8 @@ let getBuyOrders = async function () {
                         let order = results2[i];
                         let persistedOrder = activeBuyOrderMap.get(token + "_" + buyer);
                         persistedOrder = persistedOrder ? persistedOrder : buyOrderMap.get(token + "_" + buyer);
-                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled && !persistedOrder?.executed) {
+                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) &&
+                            !order.executed && !order.canceled &&  (!persistedOrder || (persistedOrder && !persistedOrder.executed))) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
@@ -406,7 +407,8 @@ let getSellOrders = async function () {
                         let order = results2[i];
                         let persistedOrder = activeSellOrderMap.get(token + "_" + seller);
                         persistedOrder = persistedOrder ? persistedOrder : sellOrderMap.get(token + "_" + seller);
-                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled && !persistedOrder?.executed) {
+                        if (((order.orderId % groupCount) === (processorNumber % groupCount))
+                            && !order.executed && !order.canceled && (!persistedOrder || (persistedOrder && !persistedOrder.executed))) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
