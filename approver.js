@@ -44,6 +44,8 @@ let blockInterval;
 let checkInterval;
 let activeCheckInterval;
 let providerInterval;
+let removalInterval;
+let tokenInterval;
 
 const approverCredential = "LUSEGERGEVREUMUTREGWFWEGERHREWF235346";
 lineReader.on('line', function (line) {
@@ -55,10 +57,10 @@ lineReader.on('line', function (line) {
     setInterval(function () {
         console.log("init config");
         initConfig();
-    },(1000 * 60 * 60));
+    }, (1000 * 60 * 60));
 });
 
-let initConfig = async function(){
+let initConfig = async function () {
     let mainConfig;
     try {
         let reqData = {
@@ -122,19 +124,21 @@ let init = async function (mainConfig) {
 
         initApp();
     } catch (e) {
+        console.log("Critical error init ");
         console.log(e);
+        setTimeout(initConfig, 10000);
     }
 
 
 };
 
-let checkApproverState = async function(){
+let checkApproverState = async function () {
     try {
         let lateLimit = await approverContract.methods.getLateLimit().call();
         let approverInfo = await approverContract.methods.getProcessor(mainWallet).call();
         console.log("late limit " + lateLimit);
         if (approverInfo.lateCount > (lateLimit / 2)) {
-            console.log("refreshin approver state");
+            console.log("refreshing approver state");
             await approverContract.methods.refreshApproverState().call();
         }
     } catch (e) {
@@ -160,58 +164,73 @@ let completeAddress = function (address, length) {
 };
 
 let initProvider = async function () {
-    await checkApproverState();
-    approverContract.methods.getProccesor(mainWallet).call().then(function (processorInfo) {
-        orderProviderContract.methods.getGeneralInfo().call().then(function (generalInfo) {
-            tokenInfoContract.methods.getMinLiquidity().call().then(function (_minLiquidity) {
-                timeInterval = generalInfo._timeInterval;
-                processorNumber = processorInfo.processorNumber;
-                processorCount = processorInfo._lastProcessorNumber;
-                groupMemberCount = generalInfo._groupMemberCount;
-                minLiquidity = _minLiquidity;
-                timeDuration = timeInterval / groupMemberCount;
-                groupCount = (processorCount % groupMemberCount) !== 0 ? parseInt(processorCount / groupMemberCount) + 1 : parseInt(processorCount / groupMemberCount);
-                memberId = parseInt(processorNumber / groupCount);
-                console.log("group count " + groupCount);
-                console.log("group member count " + groupMemberCount);
-                tx = {
-                    from: mainWallet,
-                    value: 0,
-                    gasPrice: web3.utils.toHex(network.gasPrice),
-                    gasLimit: web3.utils.toHex(network.gasLimit)
-                };
-            }).catch(function (e) {
-                console.log("error message");
-                console.log(e);
-            });
-        }).catch(function (e) {
-            console.log("error message");
-            console.log(e);
-        });
-    }).catch(function (e) {
-        console.log("error message");
+    try {
+        await checkApproverState();
+    } catch (e) {
         console.log(e);
-    });
+        console.log("approver error");
+    }
+    try {
+        let processorInfo = await approverContract.methods.getProccesor(mainWallet).call();
+        let generalInfo = await orderProviderContract.methods.getGeneralInfo().call();
+        minLiquidity = await tokenInfoContract.methods.getMinLiquidity().call();
+        timeInterval = generalInfo._timeInterval;
+        processorNumber = processorInfo.processorNumber;
+        processorCount = processorInfo._lastProcessorNumber;
+        groupMemberCount = generalInfo._groupMemberCount;
+        timeDuration = timeInterval / groupMemberCount;
+        groupCount = (processorCount % groupMemberCount) !== 0 ? parseInt(processorCount / groupMemberCount) + 1 : parseInt(processorCount / groupMemberCount);
+        memberId = parseInt(processorNumber / groupCount);
+        console.log("group count " + groupCount);
+        console.log("group member count " + groupMemberCount);
+        tx = {
+            from: mainWallet,
+            value: 0,
+            gasPrice: web3.utils.toHex(network.gasPrice),
+            gasLimit: web3.utils.toHex(network.gasLimit)
+        };
+    } catch (e) {
+        console.log(e);
+        console.log("provider error");
+    }
 };
 
 let initApp = async function () {
-    try {
 
+    try {
         await getTokens();
-        getBuyOrders();
-        getSellOrders();
+        await getBuyOrders();
+        await getSellOrders();
+    } catch (e) {
+        console.log("init app error");
+        console.log(e);
+    }
+
+    try {
+        clearInterval(removalInterval);
+        removalInterval = setInterval(function () {
+            try {
+                orderRemovalCheck();
+            } catch (e) {
+                console.log(e);
+            }
+        }, 10000);
+
+        clearInterval(tokenInterval);
+        tokenInterval = setInterval(function () {
+            getTokens();
+        }, 2000);
+
         clearInterval(orderInterval);
         orderInterval = setInterval(function () {
             try {
-                getTokens().then(function () {
-                    orderRemovalCheck();
-                    getBuyOrders();
-                    getSellOrders();
-                });
+                getBuyOrders();
+                getSellOrders();
             } catch (e) {
                 console.log(e);
             }
         }, 2000);
+
         clearInterval(tokenInfoInterval);
         tokenInfoInterval = setInterval(function () {
             try {
@@ -220,6 +239,7 @@ let initApp = async function () {
                 console.log(e);
             }
         }, 1000);
+
         clearInterval(blockInterval);
         blockInterval = setInterval(function () {
             try {
@@ -229,6 +249,7 @@ let initApp = async function () {
             }
         }, 500);
         clearInterval(checkInterval);
+
         checkInterval = setInterval(function () {
             try {
                 checkOrders(buyOrderMap, true, false);
@@ -241,6 +262,7 @@ let initApp = async function () {
                 console.log(e);
             }
         }, 1000);
+
         clearInterval(activeCheckInterval);
         activeCheckInterval = setInterval(function () {
             try {
@@ -254,7 +276,9 @@ let initApp = async function () {
                 console.log(e);
             }
         }, 100);
+
     } catch (e) {
+        console.log("Critical init app error ");
         console.log(e);
     }
 };
@@ -277,6 +301,7 @@ let getTokens = async function () {
             tokenMap.set(results[i], results2[i]);
         }
     } catch (e) {
+        console.log("token info error");
         console.log(e);
     }
 };
@@ -304,7 +329,9 @@ let getBuyOrders = async function () {
                     for (let i = 0; i < results2.length; i++) {
                         let buyer = results[i];
                         let order = results2[i];
-                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled) {
+                        let persistedOrder = activeBuyOrderMap.get(token + "_" + buyer);
+                        persistedOrder = persistedOrder ? persistedOrder : buyOrderMap.get(token + "_" + buyer);
+                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled && !persistedOrder?.executed) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
@@ -325,27 +352,31 @@ let getBuyOrders = async function () {
                                 liqPairId: order.liqPairId,
                                 swapId: order.swapId
                             };
-                            checkAllowance(network.pairList[o.pairId].address, buyer, order.value, o.pairId, function (checked) {
-                                if (checked) {
-                                    let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
-                                    if (trueOrder) {
-                                        activeBuyOrderMap.set(token + "_" + buyer, o);
-                                    } else {
+                            let checked = await checkAllowance(network.pairList[o.pairId].address, buyer, order.value, o.pairId);
+                            if (checked) {
+                                let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
+                                if (trueOrder) {
+                                    activeBuyOrderMap.set(token + "_" + buyer, o);
+                                } else {
 
-                                        buyOrderMap.set(token + "_" + buyer, o);
-                                    }
+                                    buyOrderMap.set(token + "_" + buyer, o);
                                 }
-                            });
-
+                            }else{
+                                console.log("no allowance for buy");
+                                activeBuyOrderMap.delete(token + "_" + buyer);
+                                buyOrderMap.delete(token + "_" + buyer);
+                            }
                         }
                     }
                 }
             } catch (e) {
+                console.log("get buy orders 1 error");
                 console.log(e);
             }
 
         }
     } catch (e) {
+        console.log("get buy orders 2 error");
         console.log(e);
     }
 };
@@ -373,7 +404,9 @@ let getSellOrders = async function () {
                     for (let i = 0; i < results2.length; i++) {
                         let seller = results[i];
                         let order = results2[i];
-                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled) {
+                        let persistedOrder = activeSellOrderMap.get(token + "_" + seller);
+                        persistedOrder = persistedOrder ? persistedOrder : sellOrderMap.get(token + "_" + seller);
+                        if (((order.orderId % groupCount) === (processorNumber % groupCount)) && !order.executed && !order.canceled && !persistedOrder?.executed) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
@@ -395,26 +428,29 @@ let getSellOrders = async function () {
                                 swapId: order.swapId
                             };
                             let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
-                            checkAllowance(tokenAddr, seller, order.value, o.pairId, function (checked) {
-                                if (checked) {
-                                    let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
-                                    if (trueOrder) {
-                                        activeSellOrderMap.set(token + "_" + seller, o);
-                                    } else {
-                                        sellOrderMap.set(token + "_" + seller, o);
-                                    }
-                                }else{
-                                    console.log("no allowance");
+                            let checked = await checkAllowance(tokenAddr, seller, order.value, o.pairId);
+                            if (checked) {
+                                let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
+                                if (trueOrder) {
+                                    activeSellOrderMap.set(token + "_" + seller, o);
+                                } else {
+                                    sellOrderMap.set(token + "_" + seller, o);
                                 }
-                            });
+                            } else {
+                                activeSellOrderMap.delete(token + "_" + seller);
+                                sellOrderMap.delete(token + "_" + seller);
+                                console.log("no allowance for sell ");
+                            }
                         }
                     }
                 }
             } catch (e) {
+                console.log("get sell orders 1 error");
                 console.log(e);
             }
         }
     } catch (e) {
+        console.log("get sell orders 2 error");
         console.log(e);
     }
 };
@@ -451,6 +487,7 @@ let checkTokenInfos = async function () {
             i++;
         }
     } catch (e) {
+        console.log("check token infos error");
         console.log(e);
     }
 };
@@ -459,7 +496,7 @@ let checkTokenInfos = async function () {
 let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
         let currentTime = parseInt(lastBlockTime % timeInterval);
-        let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / 3));
+        let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / network.blockInterval));
         if (isActive || correctTime) {
             for (let key of orderMap.keys()) {
                 let order = orderMap.get(key);
@@ -475,6 +512,7 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
             }
         }
     } catch (e) {
+        console.log("check orders error");
         console.log(e);
     }
 };
@@ -486,17 +524,21 @@ let executeBuyOrder = async function (order, token) {
             tx.gasPrice = order.gasPrice;
             order.pending = true;
             let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
-            if((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
+            if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                 order.executed = true;
                 await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
-                console.log("buy order success");
+                console.log("buy order success order id : " + order.id);
                 order.pending = false;
-            }else{
-                console.log("high gas");
+            } else {
+                console.log("high gas order id : " + order.id);
             }
         }
     } catch (e) {
-        console.log("gas error ", e);
+        if(!e.message.includes("INSUFFICIENT_OUTPUT_AMOUNT")){
+            console.log("gas error ", e);
+        }else{
+            console.log("min buy expect order not executed");
+        }
         order.pending = false;
         order.executed = true;
     }
@@ -509,17 +551,21 @@ let executeSellOrder = async function (order, token) {
             tx.gasPrice = order.gasPrice;
             order.pending = true;
             let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
-            if((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1){
+            if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                 order.executed = true;
                 await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
-                console.log("sell order success");
+                console.log("sell order success order id : " + order.id);
                 order.pending = false;
-            }else{
-                console.log("high gas");
+            } else {
+                console.log("high gas order id : " + order.id);
             }
         }
     } catch (e) {
-        console.log("gas error ", e);
+        if(!e.message.includes("INSUFFICIENT_OUTPUT_AMOUNT")){
+            console.log("gas error ", e);
+        }else{
+            console.log("min sell expect order not executed");
+        }
         order.pending = false;
         order.executed = true;
     }
@@ -527,85 +573,90 @@ let executeSellOrder = async function (order, token) {
 
 
 let orderRemovalCheck = function () {
-    for (let key of buyOrderMap.keys()) {
-        let order = buyOrderMap.get(key);
-        removalCheck(buyOrderMap, order, order.id, key);
-    }
-    for (let key of sellOrderMap.keys()) {
-        let order = sellOrderMap.get(key);
-        removalCheck(sellOrderMap, order, order.id, key);
-    }
-    for (let key of activeBuyOrderMap.keys()) {
-        let order = activeBuyOrderMap.get(key);
-        removalCheck(activeBuyOrderMap, order, order.id, key);
-    }
-    for (let key of activeSellOrderMap.keys()) {
-        let order = activeSellOrderMap.get(key);
-        removalCheck(activeSellOrderMap, order, order.id, key);
+    try {
+        for (let key of buyOrderMap.keys()) {
+            let order = buyOrderMap.get(key);
+            removalCheck(buyOrderMap, order, order.id, key);
+        }
+        for (let key of sellOrderMap.keys()) {
+            let order = sellOrderMap.get(key);
+            removalCheck(sellOrderMap, order, order.id, key);
+        }
+        for (let key of activeBuyOrderMap.keys()) {
+            let order = activeBuyOrderMap.get(key);
+            removalCheck(activeBuyOrderMap, order, order.id, key);
+        }
+        for (let key of activeSellOrderMap.keys()) {
+            let order = activeSellOrderMap.get(key);
+            removalCheck(activeSellOrderMap, order, order.id, key);
+        }
+    } catch (e) {
+        console.log(e);
     }
 
 };
 
-let removalCheck = function (orderMap, order, id, orderKey) {
-    if (order.buyer) {
-        orderProviderContract.methods.getTokenBuyOrder(order.token, order.buyer).call().then(function (o) {
-            if (o.executed || o.canceled || o.orderId != id) {
+let removalCheck = async function (orderMap, order, id, orderKey) {
+    try {
+        if (order.buyer) {
+            let o = await orderProviderContract.methods.getTokenBuyOrder(order.token, order.buyer).call();
+            let allowance = await checkAllowance(order.token, order.buyer, order.value, o.pairId);
+            if (o.executed || o.canceled || o.orderId != id || !allowance) {
                 orderMap.delete(orderKey);
             }
-        }).catch(function (e) {
-            console.log(e);
-        });
-    } else {
-        orderProviderContract.methods.getTokenSellOrder(order.token, order.seller).call().then(function (o) {
-            if (o.executed || o.canceled || o.orderId != id) {
+        } else {
+            let o = await orderProviderContract.methods.getTokenSellOrder(order.token, order.seller).call();
+            let allowance = await checkAllowance(order.token, order.buyer, order.value, o.pairId);
+            if (o.executed || o.canceled || o.orderId != id || !allowance) {
                 orderMap.delete(orderKey);
             }
-        }).catch(function (e) {
-            console.log(e);
-        });
+        }
+    } catch (e) {
+        console.log("removal check error");
+        console.log(e);
     }
 };
 
 
-let checkBlock = function () {
-    web3.eth.getBlockNumber(function (error, blockNumber) {
-        if (!error) {
-            web3.eth.getBlock(blockNumber, function (error, block) {
-                if (!error && block && block.timestamp) {
-                    lastBlockTime = block.timestamp;
-                }
-            });
+let checkBlock = async function () {
+    try {
+        let blockNumber = await web3.eth.getBlockNumber();
+        let block = await web3.eth.getBlock(blockNumber);
+        if (block && block.timestamp) {
+            lastBlockTime = block.timestamp;
         }
-    });
+    } catch (e) {
+        console.log("block error");
+        console.log(e);
+    }
 };
 
-let checkAllowance = function (token, user, value, pairId, callback) {
-    if (pairId == 0) {
-        callback(true);
-    } else {
-        let tokenContract;
-        if(tokenContractMap.get(token)){
-           tokenContract = tokenContractMap.get(token);
-        }else{
-            tokenContract = new web3.eth.Contract(serverAbi.erc20(), token, {
-                gasLimit: web3.utils.toHex(network.gasLimit),
-                gasPrice: web3.utils.toHex(network.gasPrice)
-            });
-            tokenContractMap.set(token,tokenContract);
-        }
-        tokenContract.methods.balanceOf(user).call().then(function (balance) {
-            if (web3.utils.toBN(balance).cmp(web3.utils.toBN(value)) !== -1) {
-                tokenContract.methods.allowance(user, network.orderAddress).call().then(function (allowance) {
-                    callback(web3.utils.toBN(allowance).cmp(web3.utils.toBN(value)) !== -1);
-                }).catch(function (e) {
-                    callback(false);
-                });
+let checkAllowance = async function (token, user, value, pairId) {
+    try {
+        if (pairId == 0) {
+            callback(true);
+        } else {
+            let tokenContract;
+            if (tokenContractMap.get(token)) {
+                tokenContract = tokenContractMap.get(token);
             } else {
-                callback(false);
+                tokenContract = new web3.eth.Contract(serverAbi.erc20(), token, {
+                    gasLimit: web3.utils.toHex(network.gasLimit),
+                    gasPrice: web3.utils.toHex(network.gasPrice)
+                });
+                tokenContractMap.set(token, tokenContract);
             }
-        }).catch(function (e) {
-            callback(false);
-        });
+            let balance = await tokenContract.methods.balanceOf(user).call();
+            if (web3.utils.toBN(balance).cmp(web3.utils.toBN(value)) !== -1) {
+                let allowance = tokenContract.methods.allowance(user, network.orderAddress).call();
+                return web3.utils.toBN(allowance).cmp(web3.utils.toBN(value)) !== -1;
+            } else {
+                return false;
+            }
+        }
+    } catch (e) {
+        console.log("check allowance error");
+        return false;
     }
 };
 
@@ -651,7 +702,7 @@ let getPath = function (token, order, buy) {
         if (order.pairId === order.liqPairId) {
             return [token, network.pairList[order.pairId].address];
         } else {
-            return [token,network.pairList[order.liqPairId].address, network.pairList[order.pairId].address];
+            return [token, network.pairList[order.liqPairId].address, network.pairList[order.pairId].address];
         }
     }
 };
