@@ -31,12 +31,13 @@ let web3;
 let network;
 
 let tokenMap = new Map();
-let tokenInfoMap = guavaCache({expiry: '10m', maxItems: 500});
+let tokenInfoMap = guavaCache({expiry: '10m', maxItems: 1000});
 let buyOrderMap = new Map();
 let activeBuyOrderMap = new Map();
 let sellOrderMap = new Map();
 let activeSellOrderMap = new Map();
 let tokenContractMap = new Map();
+let tokenKeys = new Map();
 
 
 
@@ -227,6 +228,7 @@ let initApp = async function () {
         clearInterval(orderInterval);
         orderInterval = setInterval(function () {
             try {
+                tokenKeys = new Map();
                 getBuyOrders();
                 getSellOrders();
             } catch (e) {
@@ -331,9 +333,7 @@ let getBuyOrders = async function () {
                     }
                     let results2 = await Promise.all(_promises2);
                     let key = initTokenInfoKey(results2[0], token);
-                    if (!tokenInfoMap.get(key)) {
-                        tokenInfoMap.set(key, {});
-                    }
+                    tokenKeys.set(key,key);
                     for (let i = 0; i < results2.length; i++) {
                         let buyer = results[i];
                         let order = results2[i];
@@ -410,9 +410,7 @@ let getSellOrders = async function () {
                     }
                     let results2 = await Promise.all(_promises2);
                     let key = initTokenInfoKey(results2[0], token);
-                    if (!tokenInfoMap.get(key)) {
-                        tokenInfoMap.set(key, {});
-                    }
+                    tokenKeys.set(key,key);
                     for (let i = 0; i < results2.length; i++) {
                         let seller = results[i];
                         let order = results2[i];
@@ -479,7 +477,7 @@ let initTokenInfoKey = function (order, token) {
 let checkTokenInfos = async function () {
     try {
         let tokenInfoPromises = [];
-        for (let key of tokenInfoMap.keys()) {
+        for (let key of tokenKeys.keys()) {
             let params = key.split("_");
             let token = params[0];
             let pairId = params[1];
@@ -489,7 +487,7 @@ let checkTokenInfos = async function () {
         }
         const results = await Promise.allSettled(tokenInfoPromises);
         let i = 0;
-        for (let key of tokenInfoMap.keys()) {
+        for (let key of tokenKeys.keys()) {
             if (results[i].status === 'fulfilled') {
                 let params = key.split("_");
                 let pairId = params[1];
