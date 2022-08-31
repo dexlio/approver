@@ -115,7 +115,7 @@ let init = async function (mainConfig) {
             try {
                 initProvider();
                 console.log("token map size : " + tokenMap.size);
-                console.log("token info map size : " + tokenInfoMap.size);
+                console.log("token info map size : " + tokenInfoMap.size());
                 console.log("buy order map size : " + buyOrderMap.size);
                 console.log("active buy order map size : " + activeBuyOrderMap.size);
                 console.log("sell order map size : " + sellOrderMap.size);
