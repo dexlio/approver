@@ -116,6 +116,7 @@ let init = async function (mainConfig) {
                 initProvider();
                 console.log("token map size : " + tokenMap.size);
                 console.log("token info map size : " + tokenInfoMap.size());
+                console.log("token keys size : " + tokenKeys.size);
                 console.log("buy order map size : " + buyOrderMap.size);
                 console.log("active buy order map size : " + activeBuyOrderMap.size);
                 console.log("sell order map size : " + sellOrderMap.size);
@@ -228,7 +229,7 @@ let initApp = async function () {
         clearInterval(orderInterval);
         orderInterval = setInterval(function () {
             try {
-                tokenKeys = new Map();
+                tokenKeys.clear();
                 getBuyOrders();
                 getSellOrders();
             } catch (e) {
