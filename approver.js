@@ -287,6 +287,7 @@ let initApp = async function () {
 
 let getTokens = async function () {
     try {
+        let tmpMap = new Map();
         let totalTokenCount = await orderProviderContract.methods.getTokensLength().call();
         let _promises = [];
         for (let i = 0; i < totalTokenCount; i++) {
@@ -299,8 +300,9 @@ let getTokens = async function () {
         }
         let results2 = await Promise.all(_promises2);
         for (let i = 0; i < results.length; i++) {
-            tokenMap.set(results[i], results2[i]);
+            tmpMap.set(results[i], results2[i]);
         }
+        tokenMap = tmpMap;
     } catch (e) {
         console.log("token info error");
         console.log(e);
@@ -430,8 +432,7 @@ let getSellOrders = async function () {
                                 liqPairId: order.liqPairId,
                                 swapId: order.swapId
                             };
-                            let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
-                            let checked = await checkAllowance(tokenAddr, seller, order.value, o.pairId);
+                            let checked = await checkAllowance(token, seller, order.value, -1);
                             if (checked) {
                                 let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
                                 if (trueOrder) {
@@ -607,13 +608,13 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
     try {
         if (order.buyer) {
             let o = await orderProviderContract.methods.getTokenBuyOrder(order.token, order.buyer).call();
-            let allowance = await checkAllowance(order.token, order.buyer, order.value, o.pairId);
+            let allowance = await checkAllowance(network.pairList[order.pairId].address, order.buyer, order.value, o.pairId);
             if (o.executed || o.canceled || o.orderId != id || !allowance) {
                 orderMap.delete(orderKey);
             }
         } else {
             let o = await orderProviderContract.methods.getTokenSellOrder(order.token, order.seller).call();
-            let allowance = await checkAllowance(order.token, order.seller, order.value, o.pairId);
+            let allowance = await checkAllowance(order.token, order.seller, order.value, -1);
             if (o.executed || o.canceled || o.orderId != id || !allowance) {
                 orderMap.delete(orderKey);
             }
