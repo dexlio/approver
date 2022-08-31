@@ -5,6 +5,7 @@ let config = require("./config");
 let lineReader = require('readline').createInterface({
     input: require('fs').createReadStream('wallet.txt')
 });
+var guavaCache = require('guava-cache');
 
 const myArgs = process.argv.slice(2);
 console.log('myArgs: ', myArgs);
@@ -30,12 +31,13 @@ let web3;
 let network;
 
 let tokenMap = new Map();
-let tokenInfoMap = new Map();
+let tokenInfoMap = guavaCache({expiry: '10m', maxItems: 500});
 let buyOrderMap = new Map();
 let activeBuyOrderMap = new Map();
 let sellOrderMap = new Map();
 let activeSellOrderMap = new Map();
 let tokenContractMap = new Map();
+
 
 
 let orderInterval;
