@@ -183,6 +183,7 @@ let initProvider = async function () {
         memberId = parseInt(processorNumber / groupCount);
         console.log("group count " + groupCount);
         console.log("group member count " + groupMemberCount);
+        console.log("min liquidity " + minLiquidity);
         tx = {
             from: mainWallet,
             value: 0,
@@ -640,7 +641,7 @@ let checkBlock = async function () {
 let checkAllowance = async function (token, user, value, pairId) {
     try {
         if (pairId == 0) {
-            callback(true);
+            return true;
         } else {
             let tokenContract;
             if (tokenContractMap.get(token)) {
