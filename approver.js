@@ -661,6 +661,7 @@ let checkAllowance = async function (token, user, value, pairId) {
             }
         }
     } catch (e) {
+        console.log(e);
         console.log("check allowance error");
         return false;
     }
