@@ -479,13 +479,17 @@ let checkTokenInfos = async function () {
             let swapId = params[3];
             tokenInfoPromises.push(tokenInfoContract.methods.getTokenInfo(token, network.swapAMMs[swapId].address, network.pairList[pairId].address, network.pairList[liqPairId].address).call());
         }
-        let results = await Promise.all(tokenInfoPromises);
+        const results = await Promise.allSettled(tokenInfoPromises);
         let i = 0;
         for (let key of tokenInfoMap.keys()) {
-            let params = key.split("_");
-            let pairId = params[1];
-            let liqPairId = params[2];
-            tokenInfoMap.set(key, analyzeTokenInfo(results[i], pairId, liqPairId));
+            if (results[i].status === 'fulfilled') {
+                let params = key.split("_");
+                let pairId = params[1];
+                let liqPairId = params[2];
+                tokenInfoMap.set(key, analyzeTokenInfo(results[i].value, pairId, liqPairId));
+            }else{
+                console.log(key + " token info is not fetched");
+            }
             i++;
         }
     } catch (e) {
