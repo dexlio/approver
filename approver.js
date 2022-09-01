@@ -281,7 +281,7 @@ let initApp = async function () {
             } catch (e) {
                 console.log(e);
             }
-        }, 100);
+        }, 200);
 
     } catch (e) {
         console.log("Critical init app error ");
@@ -521,6 +521,12 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                     } else {
                         await executeSellOrder(order, tokenAddr);
                     }
+                }else{
+                    if(isActive){
+                        tokenInfoContract.methods.getTokenInfo(order.token, network.swapAMMs[order.swapId].address, network.pairList[order.pairId].address, network.pairList[order.liqPairId].address).call().then(function (result) {
+                            tokenInfoMap.set(key, analyzeTokenInfo(result, order.pairId, order.liqPairId));
+                        });
+                    }
                 }
             }
         }
@@ -538,9 +544,9 @@ let executeBuyOrder = async function (order, token) {
             order.pending = true;
             let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
             if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
-                order.executed = true;
                 await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
                 console.log("buy order success order id : " + order.id);
+                order.executed = true;
                 order.pending = false;
             } else {
                 console.log("high gas order id : " + order.id);
@@ -553,7 +559,6 @@ let executeBuyOrder = async function (order, token) {
             console.log("min buy expect order not executed");
         }
         order.pending = false;
-        order.executed = true;
     }
 };
 
@@ -565,9 +570,9 @@ let executeSellOrder = async function (order, token) {
             order.pending = true;
             let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
             if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
-                order.executed = true;
                 await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
                 console.log("sell order success order id : " + order.id);
+                order.executed = true;
                 order.pending = false;
             } else {
                 console.log("high gas order id : " + order.id);
@@ -580,7 +585,6 @@ let executeSellOrder = async function (order, token) {
             console.log("min sell expect order not executed");
         }
         order.pending = false;
-        order.executed = true;
     }
 };
 
