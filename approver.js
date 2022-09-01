@@ -40,7 +40,6 @@ let tokenContractMap = new Map();
 let tokenKeys = new Map();
 
 
-
 let orderInterval;
 let tokenInfoInterval;
 let blockInterval;
@@ -135,6 +134,13 @@ let init = async function (mainConfig) {
 
 
 };
+
+
+function delay(milliseconds) {
+    return new Promise(resolve => {
+        setTimeout(resolve, milliseconds);
+    });
+}
 
 let checkApproverState = async function () {
     try {
@@ -260,6 +266,7 @@ let initApp = async function () {
         }, 200);
         clearInterval(checkInterval);
 
+
         checkInterval = setInterval(function () {
             try {
                 checkOrders(buyOrderMap, true, false);
@@ -271,7 +278,7 @@ let initApp = async function () {
             } catch (e) {
                 console.log(e);
             }
-        }, 200);
+        }, 500);
 
         clearInterval(activeCheckInterval);
         activeCheckInterval = setInterval(function () {
@@ -285,7 +292,7 @@ let initApp = async function () {
             } catch (e) {
                 console.log(e);
             }
-        }, 100);
+        }, 250);
 
     } catch (e) {
         console.log("Critical init app error ");
@@ -345,7 +352,7 @@ let getBuyOrders = async function () {
                         let persistedOrder = activeBuyOrderMap.get(token + "_" + buyer);
                         persistedOrder = persistedOrder ? persistedOrder : buyOrderMap.get(token + "_" + buyer);
                         if (((order.orderId % groupCount) === (processorNumber % groupCount)) &&
-                            !order.executed && !order.canceled &&  (!persistedOrder || (persistedOrder && !persistedOrder.executed))) {
+                            !order.executed && !order.canceled) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
@@ -364,7 +371,10 @@ let getBuyOrders = async function () {
                                 gasPrice: web3.utils.toHex(order.gasCount * network.gasCountPrice),
                                 pairId: order.pairId,
                                 liqPairId: order.liqPairId,
-                                swapId: order.swapId
+                                swapId: order.swapId,
+                                tokenInfoCount:persistedOrder ? persistedOrder.tokenInfoCount : 0,
+                                pending: persistedOrder ? persistedOrder.pending : false,
+                                minExpect: persistedOrder ? persistedOrder.minExpect : false
                             };
                             let checked = await checkAllowance(network.pairList[o.pairId].address, buyer, order.value, o.pairId);
                             if (checked) {
@@ -422,7 +432,7 @@ let getSellOrders = async function () {
                         let persistedOrder = activeSellOrderMap.get(token + "_" + seller);
                         persistedOrder = persistedOrder ? persistedOrder : sellOrderMap.get(token + "_" + seller);
                         if (((order.orderId % groupCount) === (processorNumber % groupCount))
-                            && !order.executed && !order.canceled && (!persistedOrder || (persistedOrder && !persistedOrder.executed))) {
+                            && !order.executed && !order.canceled) {
                             let o = {
                                 price: order.price,
                                 value: order.value,
@@ -441,7 +451,10 @@ let getSellOrders = async function () {
                                 gasPrice: web3.utils.toHex(order.gasCount * network.gasCountPrice),
                                 pairId: order.pairId,
                                 liqPairId: order.liqPairId,
-                                swapId: order.swapId
+                                swapId: order.swapId,
+                                tokenInfoCount:persistedOrder ? persistedOrder.tokenInfoCount : 0,
+                                pending: persistedOrder ? persistedOrder.pending : false,
+                                minExpect: persistedOrder ? persistedOrder.minExpect : false
                             };
                             let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
                             let checked = await checkAllowance(tokenAddr, seller, order.value, -1);
@@ -505,6 +518,12 @@ let checkTokenInfos = async function () {
                 }else{
                     newTokenInfo.priceChanged = false;
                 }
+                if(oldTokenInfo && oldTokenInfo.count !== undefined){
+                    newTokenInfo.count = oldTokenInfo.count + 1;
+                }else{
+                    newTokenInfo.count = 0;
+                }
+
                 tokenInfoMap.set(key,newTokenInfo);
             }else{
                 console.log(key + " token info is not fetched");
@@ -528,8 +547,13 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                 let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
                 let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId;
                 let tokenInfo = tokenInfoMap.get(tokenKey);
-                let checkTokenInfo = tokenInfo && tokenInfo.priceChanged;
-                order.minExpect = !checkTokenInfo;
+                let checkTokenInfo = tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount);
+                if(order.minExpect){
+                    order.minExpect = !checkTokenInfo;
+                }
+                if(tokenInfo){
+                    order.tokenInfoCount = tokenInfo.count;
+                }
                 if (checkTokenInfo && checkConditions(order,tokenInfo ) || order.mod > 4) {
                     if (isBuy) {
                         await executeBuyOrder(order, tokenAddr);
