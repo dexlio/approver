@@ -374,7 +374,8 @@ let getBuyOrders = async function () {
                                 swapId: order.swapId,
                                 tokenInfoCount:persistedOrder ? persistedOrder.tokenInfoCount : 0,
                                 pending: persistedOrder ? persistedOrder.pending : false,
-                                minExpect: persistedOrder ? persistedOrder.minExpect : false
+                                minExpect: persistedOrder ? persistedOrder.minExpect : false,
+                                newOrder : (!persistedOrder || persistedOrder.id !== order.orderId)
                             };
                             let checked = await checkAllowance(network.pairList[o.pairId].address, buyer, order.value, o.pairId);
                             if (checked) {
@@ -454,7 +455,8 @@ let getSellOrders = async function () {
                                 swapId: order.swapId,
                                 tokenInfoCount:persistedOrder ? persistedOrder.tokenInfoCount : 0,
                                 pending: persistedOrder ? persistedOrder.pending : false,
-                                minExpect: persistedOrder ? persistedOrder.minExpect : false
+                                minExpect: persistedOrder ? persistedOrder.minExpect : false,
+                                newOrder : (!persistedOrder || persistedOrder.id !== order.orderId)
                             };
                             let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
                             let checked = await checkAllowance(tokenAddr, seller, order.value, -1);
@@ -547,13 +549,14 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                 let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
                 let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId;
                 let tokenInfo = tokenInfoMap.get(tokenKey);
-                let checkTokenInfo = tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount);
+                let checkTokenInfo = (tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount)) || order.newOrder;
                 if(order.minExpect){
                     order.minExpect = !checkTokenInfo;
                 }
                 if(tokenInfo){
                     order.tokenInfoCount = tokenInfo.count;
                 }
+                order.newOrder = false;
                 if (checkTokenInfo && checkConditions(order,tokenInfo ) || order.mod > 4) {
                     if (isBuy) {
                         await executeBuyOrder(order, tokenAddr);
