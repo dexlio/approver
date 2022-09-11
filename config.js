@@ -7,6 +7,7 @@ module.exports = {
     },
     site : function () {
         return "https://dexhub.ml/"
+        //return "http://localhost:9094/"
     }
 };
 
@@ -24,8 +25,10 @@ var networkConfig = [
         gasLimit:800000,
         approveLimit:44222,
         usdSymbol:"BUSD",
+        orderContractCreationBlock:21180854,
+        orderBlockScanInterval : 5000,
         swapAddress:"0x10ed43c718714eb63d5aa57b78b54704e256024e",
-        orderAddress: "0x14cbD76fE129e1e523B42b30C05347C983bD5Daa",
+        orderAddress: "0xB69fE4Bc603D48eB6ceaD98BC1C65B4601D112ed",
         wETHAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
         approverAddress: "0x4F83C5F3b9853bfbbeBC997d9982ab7677032A5c",
         infoAddress: "0x30eaB84e2B69BcD89C58174743984EC52aC1dA3c",
@@ -88,8 +91,10 @@ var networkConfig = [
         approveLimit: 500000,
         usdSymbol: "USDT",
         blockInterval: 4,
+        orderContractCreationBlock:32884039,
+        orderBlockScanInterval : 10000,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",
-        orderAddress: "0xd502f168498db348000aBFaaaca7dF3109e68a12",
+        orderAddress: "0x05bd0Ab6c24b47BcB1623Ef71b770A779778D61C",
         approverAddress: "0xEBB3942AFd11418fD6f08F217D14860B023648c1",
         infoAddress: "0x3CBBB0F5cbb6405229E9ab0b5ABe2Ed3d52Ea828",
         wETHAddress: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
@@ -141,8 +146,10 @@ var networkConfig = [
         approveLimit: 300000,
         usdSymbol: "USDC",
         blockInterval: 3,
+        orderContractCreationBlock: 3758707,
+        orderBlockScanInterval : 2048,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
-        orderAddress: "0x638f95547C0f4586316d5A716989E910093Cf4aA",
+        orderAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
         approverAddress: "0xE7abB1181A8b602dCDd92dC0deF2394Dd010b74B",
         infoAddress: "0xF67428189f27E36425572EF4a715E1B6B9078153",
         wETHAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
