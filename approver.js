@@ -150,28 +150,30 @@ let initOrders = async function (startBlock) {
     let endBlock = await web3.eth.getBlockNumber();
     let blockInterval = network.orderBlockScanInterval;
     if (readFromDb) {
-        orderStore.getBlockFromDB(async function (lastBlockObj) {
-            orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
-                orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
-                    for (let i = 0; i < buyResults.length; i++) {
-                        let buyResult = buyResults[i];
-                        if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
-                            buyOrderKeyMap.set(buyResult.id, buyResult);
+        if (endBlock > startBlock) {
+            orderStore.getBlockFromDB(async function (lastBlockObj) {
+                orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
+                    orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
+                        for (let i = 0; i < buyResults.length; i++) {
+                            let buyResult = buyResults[i];
+                            if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
+                                buyOrderKeyMap.set(buyResult.id, buyResult);
+                            }
                         }
-                    }
-                    for (let i = 0; i < sellResults.length; i++) {
-                        let sellResult = sellResults[i];
-                        if (((sellResult.id % groupCount) === (processorNumber % groupCount))) {
-                            sellOrderKeyMap.set(sellResult.id, sellResult);
+                        for (let i = 0; i < sellResults.length; i++) {
+                            let sellResult = sellResults[i];
+                            if (((sellResult.id % groupCount) === (processorNumber % groupCount))) {
+                                sellOrderKeyMap.set(sellResult.id, sellResult);
+                            }
                         }
-                    }
-                    startBlock = lastBlockObj ? lastBlockObj.block : startBlock;
-                    await getBuyOrders(Array.from(buyOrderKeyMap.values()));
-                    await getSellOrders(Array.from(sellOrderKeyMap.values()));
-                    lastBlock = startBlock;
+                        await getBuyOrders(Array.from(buyOrderKeyMap.values()));
+                        await getSellOrders(Array.from(sellOrderKeyMap.values()));
+                        lastBlock = endBlock;
+                        initOrderCompleted = true;
+                    });
                 });
             });
-        });
+        }
     }else {
         if (endBlock - blockInterval > startBlock) {
             orderStore.getBlockFromDB(async function (lastBlockObj) {
