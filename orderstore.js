@@ -28,9 +28,18 @@ async function connectToDB(path, file) {
 async function initOrderTable(isBuy) {
     let db = isBuy ? buyDb : sellDb;
     const createSql = 'CREATE TABLE IF NOT EXISTS orderTable (id INTEGER PRIMARY KEY, pair TEXT, taker TEXT,block INTEGER)';
+    const indexSql = 'CREATE INDEX block_idx ON orderTable (block);';
     try {
-        await db.run(createSql);
-        console.log("table created");
+        await db.run(createSql,(err, result) => {
+            console.log("table created");
+            try {
+                db.run(indexSql, (err, result) => {
+                    console.log("index created");
+                });
+            } catch (e) {
+                console.log(e);
+            }
+        });
     } catch (e) {
         console.log(e);
     }

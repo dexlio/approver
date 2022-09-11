@@ -10,7 +10,7 @@ var guavaCache = require('guava-cache');
 
 const myArgs = process.argv.slice(2);
 console.log('myArgs: ', myArgs);
-
+let readFromDb = false;
 let orderProviderContract;
 let approverContract;
 let tokenInfoContract;
@@ -95,6 +95,7 @@ let init = async function (mainConfig) {
     try {
 
         network = mainConfig[myArgs[1]];
+        readFromDb = myArgs[2];
         orderStore.init(myArgs[1]);
         console.log("connecting to : " + network.name);
         let networkProvider = network.nodeAddress;
@@ -148,7 +149,7 @@ let init = async function (mainConfig) {
 let initOrders = async function (startBlock) {
     let endBlock = await web3.eth.getBlockNumber();
     let blockInterval = network.orderBlockScanInterval;
-    if (endBlock - blockInterval > startBlock) {
+    if (readFromDb) {
         orderStore.getBlockFromDB(async function (lastBlockObj) {
             orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
                 orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
@@ -165,104 +166,128 @@ let initOrders = async function (startBlock) {
                         }
                     }
                     startBlock = lastBlockObj ? lastBlockObj.block : startBlock;
-                    for (let i = startBlock; i < endBlock; i += blockInterval) {
-                        try {
-                            let events = await orderProviderContract.getPastEvents('CreateOrder', {
-                                fromBlock: i,
-                                toBlock: Math.min(i + blockInterval, endBlock),
-                            });
-                            for (let j = 0; j < events.length; j++) {
-                                let data = events[j].returnValues;
-                                if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
-                                    if (data.isBuy) {
-                                        buyOrderKeyMap.set(data.orderId, data);
-                                    } else {
-                                        sellOrderKeyMap.set(data.orderId, data);
-                                    }
-                                }
-                                if (data.isBuy) {
-                                    await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, true);
-                                } else {
-                                    await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, false);
-                                }
-                            }
-                            await delay(1000);
-                            let deleteEvents = await orderProviderContract.getPastEvents('Order', {
-                                fromBlock: i,
-                                toBlock: Math.min(i + blockInterval, endBlock),
-                            });
-                            for (let j = 0; j < deleteEvents.length; j++) {
-                                let data = deleteEvents[j].returnValues;
-                                if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
-                                    buyOrderKeyMap.delete(data.orderId);
-                                    sellOrderKeyMap.delete(data.orderId);
-                                }
-                                await orderStore.deleteOrderFromDB(data.orderId, true);
-                                await orderStore.deleteOrderFromDB(data.orderId, false);
-                            }
-                            await getBuyOrders(Array.from(buyOrderKeyMap.values()));
-                            await getSellOrders(Array.from(sellOrderKeyMap.values()));
-                        } catch (e) {
-                            console.log("limit");
-                            console.log(e);
-                        }
-                        await delay(1000);
-                    }
-                    await orderStore.updateBlockToDB(0,endBlock);
-                    lastBlock = endBlock;
-                    await delay(1000);
-                    initOrderCompleted = true;
+                    await getBuyOrders(Array.from(buyOrderKeyMap.values()));
+                    await getSellOrders(Array.from(sellOrderKeyMap.values()));
+                    lastBlock = startBlock;
                 });
             });
         });
-    } else {
-        try {
-            if (endBlock > startBlock) {
-                let events = await orderProviderContract.getPastEvents('CreateOrder', {
-                    fromBlock: startBlock,
-                    toBlock: 'latest',
+    }else {
+        if (endBlock - blockInterval > startBlock) {
+            orderStore.getBlockFromDB(async function (lastBlockObj) {
+                orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
+                    orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
+                        for (let i = 0; i < buyResults.length; i++) {
+                            let buyResult = buyResults[i];
+                            if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
+                                buyOrderKeyMap.set(buyResult.id, buyResult);
+                            }
+                        }
+                        for (let i = 0; i < sellResults.length; i++) {
+                            let sellResult = sellResults[i];
+                            if (((sellResult.id % groupCount) === (processorNumber % groupCount))) {
+                                sellOrderKeyMap.set(sellResult.id, sellResult);
+                            }
+                        }
+                        startBlock = lastBlockObj ? lastBlockObj.block : startBlock;
+                        for (let i = startBlock; i < endBlock; i += blockInterval) {
+                            try {
+                                let events = await orderProviderContract.getPastEvents('CreateOrder', {
+                                    fromBlock: i,
+                                    toBlock: Math.min(i + blockInterval, endBlock),
+                                });
+                                for (let j = 0; j < events.length; j++) {
+                                    let data = events[j].returnValues;
+                                    if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
+                                        if (data.isBuy) {
+                                            buyOrderKeyMap.set(data.orderId, data);
+                                        } else {
+                                            sellOrderKeyMap.set(data.orderId, data);
+                                        }
+                                    }
+                                    if (data.isBuy) {
+                                        await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, true);
+                                    } else {
+                                        await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, false);
+                                    }
+                                }
+                                await delay(1000);
+                                let deleteEvents = await orderProviderContract.getPastEvents('Order', {
+                                    fromBlock: i,
+                                    toBlock: Math.min(i + blockInterval, endBlock),
+                                });
+                                for (let j = 0; j < deleteEvents.length; j++) {
+                                    let data = deleteEvents[j].returnValues;
+                                    if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
+                                        buyOrderKeyMap.delete(data.orderId);
+                                        sellOrderKeyMap.delete(data.orderId);
+                                    }
+                                    await orderStore.deleteOrderFromDB(data.orderId, true);
+                                    await orderStore.deleteOrderFromDB(data.orderId, false);
+                                }
+                                await getBuyOrders(Array.from(buyOrderKeyMap.values()));
+                                await getSellOrders(Array.from(sellOrderKeyMap.values()));
+                            } catch (e) {
+                                console.log("limit");
+                                console.log(e);
+                            }
+                            await delay(1000);
+                        }
+                        await orderStore.updateBlockToDB(0, endBlock);
+                        lastBlock = endBlock;
+                        await delay(1000);
+                        initOrderCompleted = true;
+                    });
                 });
-                for (let j = 0; j < events.length; j++) {
-                    let data = events[j].returnValues;
-                    if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
+            });
+        } else {
+            try {
+                if (endBlock > startBlock) {
+                    let events = await orderProviderContract.getPastEvents('CreateOrder', {
+                        fromBlock: startBlock,
+                        toBlock: 'latest',
+                    });
+                    for (let j = 0; j < events.length; j++) {
+                        let data = events[j].returnValues;
+                        if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
+                            if (data.isBuy) {
+                                buyOrderKeyMap.set(data.orderId, data);
+                            } else {
+                                sellOrderKeyMap.set(data.orderId, data);
+                            }
+                        }
                         if (data.isBuy) {
-                            buyOrderKeyMap.set(data.orderId, data);
+                            await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, true);
                         } else {
-                            sellOrderKeyMap.set(data.orderId, data);
+                            await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, false);
                         }
                     }
-                    if (data.isBuy) {
-                        await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, true);
-                    } else {
-                        await orderStore.addOrderToDB(data.orderId, data.pair, data.taker, events[j].blockNumber, false);
+                    await delay(1000);
+                    let deleteEvents = await orderProviderContract.getPastEvents('Order', {
+                        fromBlock: startBlock,
+                        toBlock: 'latest',
+                    });
+                    for (let j = 0; j < deleteEvents.length; j++) {
+                        let data = deleteEvents[j].returnValues;
+                        if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
+                            buyOrderKeyMap.delete(data.orderId);
+                            sellOrderKeyMap.delete(data.orderId);
+                        }
+                        await orderStore.deleteOrderFromDB(data.orderId, true);
+                        await orderStore.deleteOrderFromDB(data.orderId, false);
                     }
+                    await getBuyOrders(Array.from(buyOrderKeyMap.values()));
+                    await getSellOrders(Array.from(sellOrderKeyMap.values()));
+                    await orderStore.updateBlockToDB(0, endBlock);
+                    lastBlock = endBlock;
                 }
-                await delay(1000);
-                let deleteEvents = await orderProviderContract.getPastEvents('Order', {
-                    fromBlock: startBlock,
-                    toBlock: 'latest',
-                });
-                for (let j = 0; j < deleteEvents.length; j++) {
-                    let data = deleteEvents[j].returnValues;
-                    if (((data.orderId % groupCount) === (processorNumber % groupCount))) {
-                        buyOrderKeyMap.delete(data.orderId);
-                        sellOrderKeyMap.delete(data.orderId);
-                    }
-                    await orderStore.deleteOrderFromDB(data.orderId, true);
-                    await orderStore.deleteOrderFromDB(data.orderId, false);
-                }
-                await getBuyOrders(Array.from(buyOrderKeyMap.values()));
-                await getSellOrders(Array.from(sellOrderKeyMap.values()));
-                await orderStore.updateBlockToDB(0,endBlock);
-                lastBlock = endBlock;
-            }
 
-        } catch (e) {
-            console.log(e);
-            await delay(1000);
+            } catch (e) {
+                console.log(e);
+                await delay(1000);
+            }
         }
     }
-
 };
 
 function delay(milliseconds) {
