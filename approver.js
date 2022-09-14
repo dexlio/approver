@@ -274,6 +274,8 @@ let initOrders = async function (startBlock) {
                             initOrderCompleted = true;
                         });
                     });
+                }else{
+                    initOrderCompleted = true;
                 }
             }else{
                 initOrderCompleted = true;
