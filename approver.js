@@ -55,6 +55,7 @@ let activeCheckInterval;
 let providerInterval;
 let removalInterval;
 let registered = false;
+let networkId;
 
 const approverCredential = "LUSEGERGEVREUMUTREGWFWEGERHREWF235346";
 lineReader.on('line', function (line) {
@@ -78,7 +79,8 @@ const startApp = async function(){
     try {
         network = config.config()[myArgs[1]];
         readFromDb = myArgs[2];
-        orderStore.init(myArgs[1]);
+        networkId = myArgs[1];
+        orderStore.init(networkId);
         console.log("connecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
@@ -86,7 +88,7 @@ const startApp = async function(){
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
         await web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
-        await init(myArgs[1]);
+        await init(networkId);
     } catch (e) {
         console.log("start app failed");
         console.log(e);
@@ -99,7 +101,8 @@ let heartBeat = async function () {
         let reqData = {
             key: approverCredential,
             sign:signature,
-            publicKey:mainWallet
+            publicKey:mainWallet,
+            networkId:networkId
         };
         let response = await axios.post(config.site() + "api/approver/heartbeat", reqData, {
             headers: {
@@ -111,7 +114,7 @@ let heartBeat = async function () {
         });
         console.log(response.data);
     } catch (e) {
-        console.log(e);
+        console.log("heartbeat error");
     }
 };
 
@@ -198,10 +201,10 @@ let getOrdersFromDb = async function (networkId){
     orderStore.getBlockFromDB(async function (lastBlockObj) {
         let endBlock;
         if(lastBlockObj){
-            endBlock = lastBlockObj.block;
-        }else{
-            endBlock = await web3.eth.getBlockNumber();
+            lastBlock = lastBlockObj.block;
         }
+        endBlock = await web3.eth.getBlockNumber();
+        console.log("start " + lastBlock + " end block " + endBlock);
         try {
             let reqData = {
                 key: approverCredential,
@@ -223,15 +226,16 @@ let getOrdersFromDb = async function (networkId){
             let sellResults = response.data.sellResults;
             for (let j = 0; j < buyResults.length; j++) {
                 let buyResult = buyResults[j];
-                await orderStore.addOrderToDB(buyResult.orderId, buyResult.pair, buyResult.taker, buyResult.blockNumber, true);
+                await orderStore.addOrderToDB(buyResult.id, buyResult.pair, buyResult.taker, buyResult.block, true);
             }
             for (let j = 0; j < sellResults.length; j++) {
                 let sellResult = sellResults[j];
-                await orderStore.addOrderToDB(sellResult.orderId, sellResult.pair, sellResult.taker, sellResult.blockNumber, true);
+                await orderStore.addOrderToDB(sellResult.id, sellResult.pair, sellResult.taker, sellResult.block, false);
             }
             await orderStore.updateBlockToDB(0,response.data.lastBlock);
+            lastBlock = response.data.lastBlock;
         } catch (e) {
-            console.log(e);
+            console.log("getmyorders error");
         }
         await initOrders(lastBlock);
     });
@@ -251,14 +255,12 @@ let initOrders = async function (startBlock) {
                     orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
                         for (let i = 0; i < buyResults.length; i++) {
                             let buyResult = buyResults[i];
-                            console.log(buyResult);
                             if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
                                 buyOrderKeyMap.set(buyResult.id, buyResult);
                             }
                         }
                         for (let i = 0; i < sellResults.length; i++) {
                             let sellResult = sellResults[i];
-                            console.log(sellResult);
                             if (((sellResult.id % groupCount) === (processorNumber % groupCount))) {
                                 sellOrderKeyMap.set(sellResult.id, sellResult);
                             }
@@ -343,6 +345,7 @@ let initOrders = async function (startBlock) {
         } else {
             try {
                 if (endBlock > startBlock) {
+                    console.log("start block " + startBlock + " end block " + endBlock);
                     let events = await orderProviderContract.getPastEvents('CreateOrder', {
                         fromBlock: startBlock,
                         toBlock: 'latest',
