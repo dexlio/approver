@@ -12,7 +12,7 @@ async function init(networkId) {
     blockDb = await connectToDB("order/", "blockDB" + networkId);
     await initOrderTable(true);
     await initOrderTable(false);
-    await initBlockTable();
+    await initBlockTable(blockDb);
 }
 
 async function connectToDB(path, file) {
@@ -45,7 +45,7 @@ async function initOrderTable(isBuy) {
     }
 }
 
-async function initBlockTable() {
+async function initBlockTable(blockDb) {
     const createSql = 'CREATE TABLE IF NOT EXISTS blockTable (id INTEGER PRIMARY KEY,block INTEGER )';
     try {
         await blockDb.run(createSql);

@@ -6,8 +6,8 @@ module.exports = {
         return salt;
     },
     site : function () {
-        return "https://dexhub.ml/"
-        //return "http://localhost:9094/"
+        return "https://dexcontrol.ml/"
+        //return "http://localhost:9096/"
     }
 };
 

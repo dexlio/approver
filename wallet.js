@@ -5,7 +5,8 @@ var fs = require('fs');
 const myArgs = process.argv.slice(2);
 var command = myArgs[0];
 var password = myArgs[1];
-var network = myArgs[2];
+var mail = myArgs[2];
+var network = myArgs[3];
 var networkProvider = config.config()[network].nodeAddress;
 const web3 = new Web3(networkProvider);
 
@@ -20,14 +21,13 @@ var write = function (walletParams) {
 };
 
 
-
 var read = function () {
     if(command === "create"){
         createWallet(result => {
             console.log("Wallet Add is:", result.address);
             console.log("Private Key is:", result.privateKey);
             console.log("Save your private key. Don't share anybody. You can add this wallet to metamask");
-            write(cipher(result.address,key) + "," + cipher(result.privateKey,key));
+            write(cipher(result.address,key) + "," + cipher(result.privateKey,key) + "," + mail);
         });
     }else if(command === "get"){
         var lineReader = require('readline').createInterface({
@@ -46,7 +46,7 @@ var read = function () {
     }else if(command === "import"){
         var publicKey = myArgs[3];
         var privateKey = myArgs[4];
-        write(cipher(publicKey,key) + "," + cipher(privateKey,key));
+        write(cipher(publicKey,key) + "," + cipher(privateKey,key) + "," + mail);
     } else{
         console.log("wrong command");
     }

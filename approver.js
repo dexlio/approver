@@ -28,6 +28,7 @@ let lastBlockTime = 0;
 let tx;
 let publicKey;
 let privateKey;
+let mail;
 let web3;
 let network;
 
@@ -53,48 +54,29 @@ let checkInterval;
 let activeCheckInterval;
 let providerInterval;
 let removalInterval;
-let tokenInterval;
+let registered = false;
 
 const approverCredential = "LUSEGERGEVREUMUTREGWFWEGERHREWF235346";
 lineReader.on('line', function (line) {
     let params = line.split(",");
     publicKey = params[0];
     privateKey = params[1];
+    if(params.length > 2){
+        mail = params[2];
+    }
 }).on('close', function () {
-    initConfig();
+    startApp();
     setInterval(function () {
-        console.log("init config");
-        initConfig();
+        if(registered){
+            heartBeat();
+            console.log("heart beat");
+        }
     }, (1000 * 60 * 60));
 });
 
-let initConfig = async function () {
-    let mainConfig;
+const startApp = async function(){
     try {
-        let reqData = {
-            key: approverCredential
-        };
-        let response = await axios.post(config.site() + "api/approver/config", reqData, {
-            headers: {
-                'Accept': 'application/json',
-                'Content-Type': 'application/json',
-                'Access-Control-Allow-Origin': '*',
-                'accept': '*'
-            }
-        });
-        mainConfig = response.data;
-    } catch (e) {
-        console.log(e);
-        mainConfig = config.config();
-    }
-    init(mainConfig);
-};
-
-
-let init = async function (mainConfig) {
-    try {
-
-        network = mainConfig[myArgs[1]];
+        network = config.config()[myArgs[1]];
         readFromDb = myArgs[2];
         orderStore.init(myArgs[1]);
         console.log("connecting to : " + network.name);
@@ -103,7 +85,66 @@ let init = async function (mainConfig) {
         let key = web3.utils.toBN(web3.utils.toHex(myArgs[0])).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
-        web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
+        await web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
+        await init(myArgs[1]);
+    } catch (e) {
+        console.log("start app failed");
+        console.log(e);
+    }
+};
+
+let heartBeat = async function () {
+    try {
+        const signature = await web3.eth.sign(web3.utils.sha3("heartbeat"),mainWallet);
+        let reqData = {
+            key: approverCredential,
+            sign:signature,
+            publicKey:mainWallet
+        };
+        let response = await axios.post(config.site() + "api/approver/heartbeat", reqData, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'accept': '*'
+            }
+        });
+        console.log(response.data);
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+
+let register = async function (networkId) {
+    try {
+        const signature = await web3.eth.sign(web3.utils.sha3("register"),mainWallet);
+        let reqData = {
+            key: approverCredential,
+            sign:signature,
+            publicKey:mainWallet,
+            mail:mail,
+            networkId:networkId
+        };
+        console.log(reqData);
+        let response = await axios.post(config.site() + "api/approver/register", reqData, {
+            headers: {
+                'Accept': 'application/json',
+                'Content-Type': 'application/json',
+                'Access-Control-Allow-Origin': '*',
+                'accept': '*'
+            }
+        });
+        console.log(response.data);
+        console.log("register request sent");
+    } catch (e) {
+        console.log(e);
+    }
+};
+
+
+let init = async function (networkId) {
+    try {
         orderProviderContract = new web3.eth.Contract(serverAbi.orderProvider(), network.orderAddress, {
             gasLimit: web3.utils.toHex(network.gasLimit),
             gasPrice: web3.utils.toHex(network.gasPrice * 2)
@@ -112,18 +153,25 @@ let init = async function (mainConfig) {
             gasLimit: web3.utils.toHex(network.gasLimit),
             gasPrice: web3.utils.toHex(network.gasPrice * 2)
         });
-
         tokenInfoContract = new web3.eth.Contract(serverAbi.tokenInfo(), network.infoAddress, {
             gasLimit: web3.utils.toHex(network.gasLimit),
             gasPrice: web3.utils.toHex(network.gasPrice * 2)
         });
+
+        let processorInfo = await approverContract.methods.getProcessor(mainWallet).call();
+        if(web3.utils.toBN(processorInfo.email).cmp(web3.utils.toBN(0)) !== 1) {
+            await register(networkId);
+        }else{
+            registered = true;
+            heartBeat();
+        }
+
         await initProvider();
         lastBlock = network.orderContractCreationBlock;
         clearInterval(providerInterval);
         providerInterval = setInterval(function () {
             try {
                 initProvider();
-                console.log("token map size : " + tokenMap.size);
                 console.log("token info map size : " + tokenInfoMap.size());
                 console.log("token keys size : " + tokenKeys.size);
                 console.log("buy order map size : " + buyOrderMap.size);
@@ -133,7 +181,7 @@ let init = async function (mainConfig) {
             } catch (e) {
                 console.log(e);
             }
-        }, 10000);
+        }, 60000);
 
         initApp(parseInt(myArgs[1]));
     } catch (e) {
@@ -145,23 +193,72 @@ let init = async function (mainConfig) {
 
 };
 
+let getOrdersFromDb = async function (networkId){
+    const signature = await web3.eth.sign(web3.utils.sha3("orders"),mainWallet);
+    orderStore.getBlockFromDB(async function (lastBlockObj) {
+        let endBlock;
+        if(lastBlockObj){
+            endBlock = lastBlockObj.block;
+        }else{
+            endBlock = await web3.eth.getBlockNumber();
+        }
+        try {
+            let reqData = {
+                key: approverCredential,
+                sign: signature,
+                publicKey: mainWallet,
+                networkId: networkId,
+                startBlock: lastBlock,
+                endBlock: endBlock
+            };
+            let response = await axios.post(config.site() + "api/approver/orders", reqData, {
+                headers: {
+                    'Accept': 'application/json',
+                    'Content-Type': 'application/json',
+                    'Access-Control-Allow-Origin': '*',
+                    'accept': '*'
+                }
+            });
+            let buyResults = response.data.buyResults;
+            let sellResults = response.data.sellResults;
+            for (let j = 0; j < buyResults.length; j++) {
+                let buyResult = buyResults[j];
+                await orderStore.addOrderToDB(buyResult.orderId, buyResult.pair, buyResult.taker, buyResult.blockNumber, true);
+            }
+            for (let j = 0; j < sellResults.length; j++) {
+                let sellResult = sellResults[j];
+                await orderStore.addOrderToDB(sellResult.orderId, sellResult.pair, sellResult.taker, sellResult.blockNumber, true);
+            }
+            await orderStore.updateBlockToDB(0,response.data.lastBlock);
+        } catch (e) {
+            console.log(e);
+        }
+        await initOrders(lastBlock);
+    });
+};
+
 
 let initOrders = async function (startBlock) {
-    let endBlock = await web3.eth.getBlockNumber();
+    buyOrderKeyMap = new Map();
+    sellOrderKeyMap = new Map();
     let blockInterval = network.orderBlockScanInterval;
     if (readFromDb) {
-        if (endBlock > startBlock) {
-            orderStore.getBlockFromDB(async function (lastBlockObj) {
+        orderStore.getBlockFromDB(async function (lastBlockObj) {
+            let endBlock = lastBlockObj.block;
+            if (endBlock > startBlock) {
+                console.log("start block : " + startBlock, " end block : " + endBlock);
                 orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
                     orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
                         for (let i = 0; i < buyResults.length; i++) {
                             let buyResult = buyResults[i];
+                            console.log(buyResult);
                             if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
                                 buyOrderKeyMap.set(buyResult.id, buyResult);
                             }
                         }
                         for (let i = 0; i < sellResults.length; i++) {
                             let sellResult = sellResults[i];
+                            console.log(sellResult);
                             if (((sellResult.id % groupCount) === (processorNumber % groupCount))) {
                                 sellOrderKeyMap.set(sellResult.id, sellResult);
                             }
@@ -172,9 +269,10 @@ let initOrders = async function (startBlock) {
                         initOrderCompleted = true;
                     });
                 });
-            });
-        }
-    }else {
+            }
+        });
+    } else {
+        let endBlock = await web3.eth.getBlockNumber();
         if (endBlock - blockInterval > startBlock) {
             orderStore.getBlockFromDB(async function (lastBlockObj) {
                 orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
@@ -282,6 +380,7 @@ let initOrders = async function (startBlock) {
                     await getSellOrders(Array.from(sellOrderKeyMap.values()));
                     await orderStore.updateBlockToDB(0, endBlock);
                     lastBlock = endBlock;
+                    initOrderCompleted = true;
                 }
 
             } catch (e) {
@@ -337,6 +436,7 @@ let initProvider = async function () {
     }
     try {
         let processorInfo = await approverContract.methods.getProccesor(mainWallet).call();
+        let processor = await approverContract.methods.getProcessor(mainWallet).call();
         minLiquidity = await tokenInfoContract.methods.getMinLiquidity().call();
         groupMemberCount = await orderProviderContract.methods.getGroupMemberCount().call();
         timeInterval = await orderProviderContract.methods.getTimeInterval().call();
@@ -345,6 +445,9 @@ let initProvider = async function () {
         timeDuration = timeInterval / groupMemberCount;
         groupCount = (processorCount % groupMemberCount) !== 0 ? parseInt(processorCount / groupMemberCount) + 1 : parseInt(processorCount / groupMemberCount);
         memberId = parseInt(processorNumber / groupCount);
+        if(web3.utils.toBN(processor.email).cmp(web3.utils.toBN(0)) === 1) {
+            registered = true;
+        }
         console.log("group count " + groupCount);
         console.log("group member count " + groupMemberCount);
         console.log("min liquidity " + minLiquidity);
@@ -364,7 +467,7 @@ let initProvider = async function () {
 
 let initApp = async function (networkId) {
     try {
-        await initOrders(lastBlock);
+        await getOrdersFromDb(networkId);
     } catch (e) {
         console.log("init app error");
         console.log(e);
@@ -594,6 +697,8 @@ let initTokenInfoKey = function (order, token) {
 let checkTokenInfos = async function () {
     try {
         let tokenInfoPromises = [];
+        let tokenKeyMap = new Map();
+        let j = 0;
         for (let key of tokenKeys.keys()) {
             let params = key.split("_");
             let token = params[0];
@@ -601,10 +706,14 @@ let checkTokenInfos = async function () {
             let liqPairId = params[2];
             let swapId = params[3];
             tokenInfoPromises.push(tokenInfoContract.methods.getTokenInfo(token, network.swapAMMs[swapId].address, network.pairList[pairId].address, network.pairList[liqPairId].address).call());
+            tokenKeyMap.set(j++,key);
         }
         const results = await Promise.allSettled(tokenInfoPromises);
-        let i = 0;
-        for (let key of tokenKeys.keys()) {
+        for (let i = 0; i < results.length;i++) {
+            let key = tokenKeyMap.get(i);
+            if(!key){
+                console.log("key undefined");
+            }
             if (results[i].status === 'fulfilled') {
                 let params = key.split("_");
                 let pairId = params[1];
@@ -622,7 +731,6 @@ let checkTokenInfos = async function () {
             } else {
                 console.log(key + " token info is not fetched");
             }
-            i++;
         }
     } catch (e) {
         console.log("check token infos error");
