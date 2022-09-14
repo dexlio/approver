@@ -115,6 +115,7 @@ let heartBeat = async function () {
         console.log(response.data);
     } catch (e) {
         console.log("heartbeat error");
+        console.log(e);
     }
 };
 
