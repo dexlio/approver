@@ -146,7 +146,7 @@ var networkConfig = [
         approveLimit: 300000,
         usdSymbol: "USDC",
         blockInterval: 3,
-        orderContractCreationBlock: 3758707,
+        orderContractCreationBlock: 19728811,
         orderBlockScanInterval : 2048,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
         orderAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
