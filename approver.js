@@ -244,7 +244,6 @@ let getOrdersFromDb = async function (networkId){
 
 
 let initOrders = async function (startBlock) {
-    console.log("init orders " + startBlock);
     buyOrderKeyMap = new Map();
     sellOrderKeyMap = new Map();
     let blockInterval = network.orderBlockScanInterval;
