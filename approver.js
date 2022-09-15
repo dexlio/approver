@@ -81,26 +81,17 @@ const run = function (password) {
 };
 
 if (!fs.existsSync('wallet.txt')) {
-    console.log("wallet is not created please create or import your wallet");
+    console.log("wallet is not created. please create or import your wallet");
 }else{
-    const rl = readLine.createInterface({
-        input: process.stdin,
-        output: process.stdout
+    let lineReader = readLine.createInterface({
+        password: fs.createReadStream('pass.txt')
     });
-    rl.stdoutMuted = true;
-    rl.question('Enter the wallet password : ', function (password) {
+    lineReader.on('line', function (password) {
         run(password);
-        rl.close();
+    }).on('close', function () {
+        fs.unlinkSync("pass.txt");
     });
-    rl._writeToOutput = function _writeToOutput(stringToWrite) {
-        if (rl.stdoutMuted)
-            rl.output.write("*");
-        else
-            rl.output.write(stringToWrite);
-    };
-
 }
-
 
 
 const startApp = async function(networkId,password){

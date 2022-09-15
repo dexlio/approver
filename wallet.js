@@ -10,10 +10,27 @@ var cipher = function (text, key) {
     return web3.utils.toHex((web3.utils.toBN(text).xor(web3.utils.toBN(key))));
 };
 
-var write = function (walletParams) {
-    fs.writeFileSync("wallet.txt", walletParams, {encoding: 'utf8', flag: 'w'})
+var write = function (walletParams,path) {
+    fs.writeFileSync(path, walletParams, {encoding: 'utf8', flag: 'w'})
 };
 
+var run = function () {
+    const rl = readline.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    rl.stdoutMuted = true;
+    rl.question('Enter the wallet password : ', function (password) {
+        write(password,"pass.txt");
+        rl.close();
+    });
+    rl._writeToOutput = function _writeToOutput(stringToWrite) {
+        if (rl.stdoutMuted)
+            rl.output.write("*");
+        else
+            rl.output.write(stringToWrite);
+    };
+};
 
 var read = function (command) {
     const rl = readline.createInterface({
@@ -52,7 +69,7 @@ const walletCommands = function (rl,command) {
                                                 console.log("Save your private key. Don't share anybody. You can add this wallet to metamask");
                                                 rl.question('\nDid you save your private key and public key? !!It is very important. If you save, type "Yes" :  ', function (yes) {
                                                     if (yes === "Yes") {
-                                                        write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail);
+                                                        write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                         rl.close();
                                                     }
                                                 });
@@ -60,7 +77,7 @@ const walletCommands = function (rl,command) {
                                         } else {
                                             rl.question('What is your public key? ', function (publicKey) {
                                                 rl.question('What is your private key ? ', function (privateKey) {
-                                                    write(cipher(publicKey, key) + "," + cipher(privateKey, key) + "," + network + "," + mail);
+                                                    write(cipher(publicKey, key) + "," + cipher(privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                     console.log("Your wallet successfully imported. ");
                                                     rl.close();
                                                 });
@@ -125,6 +142,8 @@ createWallet = cb => {
 module.exports = {read};
 
 if(myArgs[0] == 'run'){
+    run();
+}else{
     read();
 }
 
