@@ -1,7 +1,6 @@
 let Web3 = require('web3');
 let axios = require('axios');
 let serverAbi = require("./abi");
-let wallet = require("./wallet");
 let orderStore = require("./orderstore");
 let config = require("./config");
 let readLine  = require('readline');
@@ -82,9 +81,7 @@ const run = function (password) {
 };
 
 if (!fs.existsSync('wallet.txt')) {
-    wallet.read("create",function (password) {
-        run(password);
-    });
+    console.log("wallet is not created please create or import your wallet");
 }else{
     const rl = readLine.createInterface({
         input: process.stdin,
