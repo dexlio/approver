@@ -39,7 +39,7 @@ var read = function (command) {
     });
 
     if(command){
-        walletCommands(rl,command);
+        walletCommands(rl,"create");
     }else{
         rl.question('What is the command you want to run? ? Options : \n 0 : create \n 1 : get \n 2 : import \n', function (command) {
             walletCommands(rl,command);
