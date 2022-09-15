@@ -54,6 +54,7 @@ let providerInterval;
 let removalInterval;
 let registered = false;
 let networkId;
+let pass;
 
 const approverCredential = "LUSEGERGEVREUMUTREGWFWEGERHREWF235346";
 
@@ -87,6 +88,7 @@ if (!fs.existsSync('wallet.txt')) {
         input: fs.createReadStream('pass.txt')
     });
     lineReader.on('line', function (password) {
+        pass = password;
         run(password);
     }).on('close', function () {
         fs.unlinkSync("pass.txt");
@@ -1031,3 +1033,7 @@ function xorAddress(a, b) {
         return address;
     }
 }
+
+process.on('exit', function(){
+    fs.writeFileSync("pass.txt", pass, {encoding: 'utf8', flag: 'w'})
+});
