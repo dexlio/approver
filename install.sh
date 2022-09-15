@@ -6,7 +6,7 @@ cd approver
 chmod 777 *.sh
 npm install
 node wallet.js both
-./firstrun.sh
+./run.sh
 crontab -l > mycron
 echo "*/2 * * * * /home/approver/check.sh" >> mycron
 crontab mycron
