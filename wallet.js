@@ -14,24 +14,6 @@ var write = function (walletParams,path) {
     fs.writeFileSync(path, walletParams, {encoding: 'utf8', flag: 'w'})
 };
 
-var run = function () {
-    const rl = readline.createInterface({
-        input: process.stdin,
-        output: process.stdout
-    });
-    rl.stdoutMuted = true;
-    rl.question('Enter the wallet password : ', function (password) {
-        write(web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2())),"pass.txt");
-        rl.close();
-    });
-    rl._writeToOutput = function _writeToOutput(stringToWrite) {
-        if (rl.stdoutMuted)
-            rl.output.write("*");
-        else
-            rl.output.write(stringToWrite);
-    };
-};
-
 var read = function (command) {
     const rl = readline.createInterface({
         input: process.stdin,
@@ -39,7 +21,7 @@ var read = function (command) {
     });
 
     if(command){
-        walletCommands(rl,"create");
+        walletCommands(rl,command);
     }else{
         rl.question('What is the command you want to run? ? Options : \n 0 : create \n 1 : get \n 2 : import \n', function (command) {
             walletCommands(rl,command);
@@ -141,7 +123,8 @@ var completeAddress = function (address, length) {
 createWallet = cb => {
     cb(web3.eth.accounts.create());
 };
-module.exports = {read};
+
+read(myArgs[0]);
 
 
 

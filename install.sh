@@ -5,7 +5,7 @@ git clone https://github.com/dexlio/approver.git
 cd approver
 chmod 777 *.sh
 npm install
-node wallet.js both
+node wallet.js create
 ./run.sh
 crontab -l > mycron
 echo "*/2 * * * * /home/approver/check.sh" >> mycron
