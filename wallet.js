@@ -72,7 +72,7 @@ const walletCommands = function (rl,command) {
                                                         write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                         rl.close();
                                                         if(myArgs[0] === "both"){
-                                                            run();
+                                                            write(password,"pass.txt");
                                                         }
                                                     }
                                                 });
