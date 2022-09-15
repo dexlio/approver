@@ -41,39 +41,43 @@ const walletCommands = function (rl,command,callback) {
                 rl.question('Type your e-mail address again : ', function (mail2) {
                     rl.question('Set a password for the wallet :  ', function (password) {
                         rl.question('Enter the password again : ', function (password2) {
-                            let key = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt())).xor(web3.utils.toBN(0));
-                            if (mail === mail2) {
-                                if (password === password2) {
-                                    if (command == 0 || command === 'create') {
-                                        createWallet(result => {
-                                            console.log("Wallet Add is:", result.address);
-                                            console.log("Private Key is:", result.privateKey);
-                                            console.log("Save your private key. Don't share anybody. You can add this wallet to metamask");
-                                            rl.question('\nDid you save your private key and public key? !!It is very important. If you save, type "Yes" :  ', function (yes) {
-                                                if(yes === "Yes"){
-                                                    write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail);
+                            try {
+                                let key = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt())).xor(web3.utils.toBN(0));
+                                if (mail === mail2) {
+                                    if (password === password2) {
+                                        if (command == 0 || command === 'create') {
+                                            createWallet(result => {
+                                                console.log("Wallet Add is:", result.address);
+                                                console.log("Private Key is:", result.privateKey);
+                                                console.log("Save your private key. Don't share anybody. You can add this wallet to metamask");
+                                                rl.question('\nDid you save your private key and public key? !!It is very important. If you save, type "Yes" :  ', function (yes) {
+                                                    if (yes === "Yes") {
+                                                        write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail);
+                                                        callback(password);
+                                                        rl.close();
+                                                    }
+                                                });
+                                            });
+                                        } else {
+                                            rl.question('What is your public key? ', function (publicKey) {
+                                                rl.question('What is your private key ? ', function (privateKey) {
+                                                    write(cipher(publicKey, key) + "," + cipher(privateKey, key) + "," + network + "," + mail);
+                                                    console.log("Your wallet successfully imported. ");
                                                     callback(password);
                                                     rl.close();
-                                                }
+                                                });
                                             });
-                                        });
+                                        }
                                     } else {
-                                        rl.question('What is your public key? ', function (publicKey) {
-                                            rl.question('What is your private key ? ', function (privateKey) {
-                                                write(cipher(publicKey, key) + "," + cipher(privateKey, key) + "," + network + "," + mail);
-                                                console.log("Your wallet successfully imported. ");
-                                                callback(password);
-                                                rl.close();
-                                            });
-                                        });
+                                        console.log("password does not match");
+                                        rl.close();
                                     }
                                 } else {
-                                    console.log("password does not match");
+                                    console.log("email does not match");
                                     rl.close();
                                 }
-                            } else {
-                                console.log("email does not match");
-                                rl.close();
+                            } catch (e) {
+                                console.log(e);
                             }
                         });
                     });
