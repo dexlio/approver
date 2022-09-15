@@ -116,7 +116,10 @@ const walletCommands = function (rl,command) {
                     rl.close();
                 });
             });
-        } else {
+        } else if(command == "run"){
+            run();
+            rl.close();
+        }else {
             console.log("wrong command");
             rl.close();
         }
@@ -141,7 +144,9 @@ createWallet = cb => {
 };
 module.exports = {read};
 
-if(myArgs[0] == 'run'){
+if(myArgs[0] == 'both'){
+    read("run");
+}else if(myArgs[0] == 'run'){
     run();
 }else{
     read();

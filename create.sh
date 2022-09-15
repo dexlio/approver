@@ -1,1 +1,1 @@
-node wallet.js run
+node wallet.js both
