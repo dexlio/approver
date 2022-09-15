@@ -49,9 +49,9 @@ const walletCommands = function (rl,command,callback) {
                                             console.log("Wallet Add is:", result.address);
                                             console.log("Private Key is:", result.privateKey);
                                             console.log("Save your private key. Don't share anybody. You can add this wallet to metamask");
-                                            write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail);
                                             rl.question('\nDid you save your private key and public key? !!It is very important. If you save, type "Yes" :  ', function (yes) {
                                                 if(yes === "Yes"){
+                                                    write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail);
                                                     callback(password);
                                                     rl.close();
                                                 }

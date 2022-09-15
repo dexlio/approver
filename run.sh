@@ -1,1 +1,1 @@
-screen -D -m node approver.js &
+screen -S -d node approver.js &
