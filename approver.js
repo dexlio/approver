@@ -88,15 +88,14 @@ if (!fs.existsSync('wallet.txt')) {
         input: fs.createReadStream('pass.txt')
     });
     lineReader.on('line', function (key) {
-        pass = web3.utils.toBN(web3.utils.toHex(key)).xor(web3.utils.toBN(config.salt2()));
-        run(pass);
+        run(key);
     }).on('close', function () {
         //fs.unlinkSync("pass.txt");
     });
 }
 
 
-const startApp = async function(networkId,password){
+const startApp = async function(networkId,key){
     try {
         network = config.config()[networkId];
         if(myArgs[1]){
@@ -106,7 +105,8 @@ const startApp = async function(networkId,password){
         console.log("\nConnecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
-        let key = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
+        pass = web3.utils.toBN(web3.utils.toHex(key)).xor(web3.utils.toBN(config.salt2()));
+        let key = web3.utils.toBN(web3.utils.toHex(pass)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
         await web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));

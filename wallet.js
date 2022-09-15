@@ -72,7 +72,7 @@ const walletCommands = function (rl,command) {
                                                         write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                         rl.close();
                                                         if(myArgs[0] === "both"){
-                                                            write(password,"pass.txt");
+                                                            write(web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2())),"pass.txt");
                                                         }
                                                     }
                                                 });
