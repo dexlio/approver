@@ -15,23 +15,23 @@ var write = function (walletParams) {
 };
 
 
-var read = function (command,callback) {
+var read = function (command) {
     const rl = readline.createInterface({
         input: process.stdin,
         output: process.stdout
     });
 
     if(command){
-        walletCommands(rl,command,callback);
+        walletCommands(rl,command);
     }else{
         rl.question('What is the command you want to run? ? Options : \n 0 : create \n 1 : get \n 2 : import \n', function (command) {
-            walletCommands(rl,command,callback);
+            walletCommands(rl,command);
         });
     }
 
 };
 
-const walletCommands = function (rl,command,callback) {
+const walletCommands = function (rl,command) {
     rl.question('Which network you want to run? ? Options : \n 0 : Binance Smart Chain \n 1 : Polygon Matic \n 2 : Avalanche-C \n', function (network) {
         let networkProvider = config.config()[network].nodeAddress;
         web3 = new Web3(networkProvider);
@@ -53,7 +53,6 @@ const walletCommands = function (rl,command,callback) {
                                                 rl.question('\nDid you save your private key and public key? !!It is very important. If you save, type "Yes" :  ', function (yes) {
                                                     if (yes === "Yes") {
                                                         write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail);
-                                                        callback(password);
                                                         rl.close();
                                                     }
                                                 });
@@ -63,7 +62,6 @@ const walletCommands = function (rl,command,callback) {
                                                 rl.question('What is your private key ? ', function (privateKey) {
                                                     write(cipher(publicKey, key) + "," + cipher(privateKey, key) + "," + network + "," + mail);
                                                     console.log("Your wallet successfully imported. ");
-                                                    callback(password);
                                                     rl.close();
                                                 });
                                             });
