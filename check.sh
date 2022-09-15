@@ -1,4 +1,5 @@
-PID=$(cat /home/approver/save_pid.txt)
+cd /home/approver
+PID=$(cat save_pid.txt)
 if ! ps -p $PID > /dev/null
 then
    echo "$PID is stopped" >> /home/approver/check.log
