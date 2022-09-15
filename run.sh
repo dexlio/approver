@@ -1,1 +1,1 @@
-nohup  node approver.js $1 $2 &
+screen -D -m node approver.js &
