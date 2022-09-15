@@ -95,17 +95,17 @@ if (!fs.existsSync('wallet.txt')) {
 }
 
 
-const startApp = async function(networkId,key){
+const startApp = async function(networkId,password){
     try {
         network = config.config()[networkId];
-        if(myArgs[1]){
-            readFromDb = myArgs[1];
+        if(myArgs[0]){
+            readFromDb = myArgs[0];
         }
         orderStore.init(networkId);
         console.log("\nConnecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
-        pass = web3.utils.toBN(web3.utils.toHex(key)).xor(web3.utils.toBN(config.salt2()));
+        pass = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()));
         let key = web3.utils.toBN(web3.utils.toHex(pass)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
