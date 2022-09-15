@@ -1,1 +1,0 @@
-node wallet.js both
