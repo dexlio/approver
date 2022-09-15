@@ -71,6 +71,9 @@ const walletCommands = function (rl,command) {
                                                     if (yes === "Yes") {
                                                         write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                         rl.close();
+                                                        if(myArgs[0] === "both"){
+                                                            run();
+                                                        }
                                                     }
                                                 });
                                             });
@@ -116,10 +119,7 @@ const walletCommands = function (rl,command) {
                     rl.close();
                 });
             });
-        } else if(command == "run"){
-            run();
-            rl.close();
-        }else {
+        } else {
             console.log("wrong command");
             rl.close();
         }
@@ -144,9 +144,9 @@ createWallet = cb => {
 };
 module.exports = {read};
 
-if(myArgs[0] == 'both'){
-    read("run");
-}else if(myArgs[0] == 'run'){
+if(myArgs[0] === 'both'){
+    read("both");
+}else if(myArgs[0] === 'run'){
     run();
 }else{
     read();
