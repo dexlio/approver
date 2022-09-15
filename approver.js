@@ -114,6 +114,7 @@ const startApp = async function(networkId,password){
     } catch (e) {
         console.log("start app failed");
         console.log(e);
+        process.exit();
     }
 };
 
