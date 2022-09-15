@@ -93,6 +93,7 @@ if (!fs.existsSync('wallet.txt')) {
     rl.stdoutMuted = true;
     rl.question('Enter the wallet password : ', function (password) {
         run(password);
+        rl.close();
     });
     rl._writeToOutput = function _writeToOutput(stringToWrite) {
         if (rl.stdoutMuted)
