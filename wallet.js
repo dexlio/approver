@@ -71,9 +71,7 @@ const walletCommands = function (rl,command) {
                                                     if (yes.toLowerCase() === "yes" || yes.toLowerCase() === "y") {
                                                         write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                         rl.close();
-                                                        if(myArgs[0] === "both"){
-                                                            write((web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()))).toString(),"pass.txt");
-                                                        }
+                                                        write((web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()))).toString(),"pass.txt");
                                                     }
                                                 });
                                             });
@@ -83,9 +81,7 @@ const walletCommands = function (rl,command) {
                                                     write(cipher(publicKey, key) + "," + cipher(privateKey, key) + "," + network + "," + mail,"wallet.txt");
                                                     console.log("Your wallet successfully imported. ");
                                                     rl.close();
-                                                    if(myArgs[0] === "both"){
-                                                        write(web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2())),"pass.txt");
-                                                    }
+                                                    write(web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2())),"pass.txt");
                                                 });
                                             });
                                         }
@@ -146,14 +142,6 @@ createWallet = cb => {
     cb(web3.eth.accounts.create());
 };
 module.exports = {read};
-
-if(myArgs[0] === 'both'){
-    read("both");
-}else if(myArgs[0] === 'run'){
-    run();
-}else{
-    read();
-}
 
 
 
