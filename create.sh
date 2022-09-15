@@ -1,1 +1,1 @@
-node wallet.js create $1 $2
+node wallet.js run

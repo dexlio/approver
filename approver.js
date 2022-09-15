@@ -1,15 +1,14 @@
 let Web3 = require('web3');
 let axios = require('axios');
 let serverAbi = require("./abi");
+let wallet = require("./wallet");
 let orderStore = require("./orderstore");
 let config = require("./config");
-let lineReader = require('readline').createInterface({
-    input: require('fs').createReadStream('wallet.txt')
-});
+let readLine  = require('readline');
 var guavaCache = require('guava-cache');
+var fs = require('fs');
 
 const myArgs = process.argv.slice(2);
-console.log('myArgs: ', myArgs);
 let readFromDb = false;
 let orderProviderContract;
 let approverContract;
@@ -58,33 +57,65 @@ let registered = false;
 let networkId;
 
 const approverCredential = "LUSEGERGEVREUMUTREGWFWEGERHREWF235346";
-lineReader.on('line', function (line) {
-    let params = line.split(",");
-    publicKey = params[0];
-    privateKey = params[1];
-    if(params.length > 2){
-        mail = params[2];
-    }
-}).on('close', function () {
-    startApp();
-    setInterval(function () {
-        if(registered){
-            heartBeat();
-            console.log("heart beat");
-        }
-    }, (1000 * 60 * 60));
-});
 
-const startApp = async function(){
+const run = function (password) {
+    let lineReader = readLine.createInterface({
+        input: fs.createReadStream('wallet.txt')
+    });
+    lineReader.on('line', function (line) {
+        let params = line.split(",");
+        publicKey = params[0];
+        privateKey = params[1];
+        networkId = params[2];
+        if(params.length > 3){
+            mail = params[3];
+        }
+    }).on('close', function () {
+        startApp(networkId,password);
+        setInterval(function () {
+            if(registered){
+                heartBeat();
+                console.log("heart beat");
+            }
+        }, (1000 * 60 * 60));
+    });
+};
+
+if (!fs.existsSync('wallet.txt')) {
+    wallet.read("create",function (password) {
+        run(password);
+    });
+}else{
+    const rl = readLine.createInterface({
+        input: process.stdin,
+        output: process.stdout
+    });
+    rl.stdoutMuted = true;
+    rl.question('Enter the wallet password : ', function (password) {
+        run(password);
+    });
+    rl._writeToOutput = function _writeToOutput(stringToWrite) {
+        if (rl.stdoutMuted)
+            rl.output.write("*");
+        else
+            rl.output.write(stringToWrite);
+    };
+
+}
+
+
+
+const startApp = async function(networkId,password){
     try {
-        network = config.config()[myArgs[1]];
-        readFromDb = myArgs[2];
-        networkId = myArgs[1];
+        network = config.config()[networkId];
+        if(myArgs[1]){
+            readFromDb = myArgs[1];
+        }
         orderStore.init(networkId);
-        console.log("connecting to : " + network.name);
+        console.log("\nConnecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
-        let key = web3.utils.toBN(web3.utils.toHex(myArgs[0])).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
+        let key = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
         await web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
@@ -187,7 +218,7 @@ let init = async function (networkId) {
             }
         }, 60000);
 
-        initApp(parseInt(myArgs[1]));
+        initApp(parseInt(networkId));
     } catch (e) {
         console.log("Critical error init ");
         console.log(e);
