@@ -21,7 +21,7 @@ var run = function () {
     });
     rl.stdoutMuted = true;
     rl.question('Enter the wallet password : ', function (password) {
-        write(password,"pass.txt");
+        write(web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2())),"pass.txt");
         rl.close();
     });
     rl._writeToOutput = function _writeToOutput(stringToWrite) {

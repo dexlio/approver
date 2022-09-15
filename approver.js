@@ -87,11 +87,11 @@ if (!fs.existsSync('wallet.txt')) {
     let lineReader = readLine.createInterface({
         input: fs.createReadStream('pass.txt')
     });
-    lineReader.on('line', function (password) {
-        pass = password;
-        run(password);
+    lineReader.on('line', function (key) {
+        pass = web3.utils.toBN(web3.utils.toHex(key)).xor(web3.utils.toBN(config.salt2()));
+        run(pass);
     }).on('close', function () {
-        fs.unlinkSync("pass.txt");
+        //fs.unlinkSync("pass.txt");
     });
 }
 
@@ -1033,7 +1033,3 @@ function xorAddress(a, b) {
         return address;
     }
 }
-
-process.on('exit', function(){
-    fs.writeFileSync("pass.txt", pass, {encoding: 'utf8', flag: 'w'})
-});

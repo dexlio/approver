@@ -5,6 +5,9 @@ module.exports = {
     salt:function () {
         return salt;
     },
+    salt2:function () {
+        return salt2;
+    },
     site : function () {
         return "https://dexcontrol.ml/"
         //return "http://localhost:9096/"
@@ -12,6 +15,7 @@ module.exports = {
 };
 
 var salt = "0x75a1bcf425891f9f6a4631aea21605ae1fa5277e9ee1fb2cb924a8ed686f070";
+var salt2 = "0x45876238693486734987329864eaf23569235aa23562394376ff235236aae24";
 
 var networkConfig = [
     {
