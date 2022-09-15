@@ -84,7 +84,7 @@ if (!fs.existsSync('wallet.txt')) {
     console.log("wallet is not created. please create or import your wallet");
 }else{
     let lineReader = readLine.createInterface({
-        password: fs.createReadStream('pass.txt')
+        input: fs.createReadStream('pass.txt')
     });
     lineReader.on('line', function (password) {
         run(password);
