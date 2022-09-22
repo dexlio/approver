@@ -97,15 +97,22 @@ if (!fs.existsSync('wallet.txt')) {
 
 const startApp = async function(networkId,password){
     try {
-        network = config.config()[networkId];
-        if(myArgs[0]){
-            readFromDb = myArgs[0];
+        if(myArgs[2]){
+            networkId = myArgs[2];
         }
+        network = config.config()[networkId];
+
         orderStore.init(networkId);
         console.log("\nConnecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
         pass = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()));
+        console.log(myArgs.length);
+        if(myArgs.length > 1){
+            pass = myArgs[0];
+            readFromDb = myArgs[1];
+        }
+        readFromDb = readFromDb !== "false";
         let key = web3.utils.toBN(web3.utils.toHex(pass)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
@@ -208,7 +215,7 @@ let init = async function (networkId) {
             } catch (e) {
                 console.log(e);
             }
-        }, 60000);
+        }, 10000);
 
         initApp(parseInt(networkId));
     } catch (e) {
@@ -235,8 +242,8 @@ let getOrdersFromDb = async function (networkId){
                 sign: signature,
                 publicKey: mainWallet,
                 networkId: networkId,
-                startBlock: lastBlock,
-                endBlock: endBlock
+                startBlock: lastBlock - 1,
+                endBlock: endBlock + 1
             };
             let response = await axios.post(config.site() + "api/approver/orders", reqData, {
                 headers: {
@@ -261,23 +268,26 @@ let getOrdersFromDb = async function (networkId){
         } catch (e) {
             console.log("getmyorders error");
         }
-        await initOrders(lastBlock);
+        await initOrders(lastBlock,true);
     });
 };
 
 
-let initOrders = async function (startBlock) {
+let initOrders = async function (startBlock,isInit) {
     buyOrderKeyMap = new Map();
     sellOrderKeyMap = new Map();
     let blockInterval = network.orderBlockScanInterval;
     if (readFromDb) {
+        console.log("read from db");
         orderStore.getBlockFromDB(async function (lastBlockObj) {
             if(lastBlockObj) {
                 let endBlock = lastBlockObj.block;
                 if (endBlock > startBlock) {
                     console.log("start block : " + startBlock, " end block : " + endBlock);
-                    orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
-                        orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
+                    orderStore.getAllOrdersFromDB(network.orderContractCreationBlock,endBlock, true, async function (buyResults) {
+                        orderStore.getAllOrdersFromDB(network.orderContractCreationBlock, endBlock, false, async function (sellResults) {
+                            console.log(buyResults);
+                            console.log(sellResults);
                             for (let i = 0; i < buyResults.length; i++) {
                                 let buyResult = buyResults[i];
                                 if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
@@ -305,10 +315,10 @@ let initOrders = async function (startBlock) {
         });
     } else {
         let endBlock = await web3.eth.getBlockNumber();
-        if (endBlock - blockInterval > startBlock) {
+        if (endBlock - blockInterval > startBlock || isInit) {
             orderStore.getBlockFromDB(async function (lastBlockObj) {
-                orderStore.getAllOrdersFromDB(startBlock, endBlock, true, async function (buyResults) {
-                    orderStore.getAllOrdersFromDB(startBlock, endBlock, false, async function (sellResults) {
+                orderStore.getAllOrdersFromDB(network.orderContractCreationBlock, endBlock, true, async function (buyResults) {
+                    orderStore.getAllOrdersFromDB(network.orderContractCreationBlock, endBlock, false, async function (sellResults) {
                         for (let i = 0; i < buyResults.length; i++) {
                             let buyResult = buyResults[i];
                             if (((buyResult.id % groupCount) === (processorNumber % groupCount))) {
@@ -377,8 +387,8 @@ let initOrders = async function (startBlock) {
                 if (endBlock > startBlock) {
                     console.log("start block " + startBlock + " end block " + endBlock);
                     let events = await orderProviderContract.getPastEvents('CreateOrder', {
-                        fromBlock: startBlock,
-                        toBlock: 'latest',
+                        fromBlock: startBlock - 1,
+                        toBlock: endBlock + 1,
                     });
                     for (let j = 0; j < events.length; j++) {
                         let data = events[j].returnValues;
@@ -397,8 +407,8 @@ let initOrders = async function (startBlock) {
                     }
                     await delay(1000);
                     let deleteEvents = await orderProviderContract.getPastEvents('Order', {
-                        fromBlock: startBlock,
-                        toBlock: 'latest',
+                        fromBlock: startBlock - 1,
+                        toBlock: endBlock + 1,
                     });
                     for (let j = 0; j < deleteEvents.length; j++) {
                         let data = deleteEvents[j].returnValues;
@@ -422,6 +432,28 @@ let initOrders = async function (startBlock) {
             }
         }
     }
+
+
+
+};
+
+const updateTokenKeys = function (isBuy) {
+    if(isBuy){
+        for(const id of buyOrderMap.keys()){
+            let order = buyOrderMap.get(id);
+            let token = order.token;
+            let key = initTokenInfoKey(order, token);
+            tokenKeys.set(key, key);
+        }
+    }else{
+        for(const id of sellOrderMap.keys()){
+            let order = sellOrderMap.get(id);
+            let token = order.token;
+            let key = initTokenInfoKey(order, token);
+            tokenKeys.set(key, key);
+        }
+    }
+
 };
 
 function delay(milliseconds) {
@@ -638,6 +670,7 @@ let getBuyOrders = async function (buyOrders) {
                     }
                 }
             }
+            updateTokenKeys(true);
         } catch (e) {
             console.log("get buy orders 1 error");
             console.log(e);
@@ -706,6 +739,7 @@ let getSellOrders = async function (sellOrders) {
                     }
                 }
             }
+            updateTokenKeys(false);
         } catch
             (e) {
             console.log("get sell orders 1 error");
