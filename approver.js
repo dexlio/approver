@@ -84,14 +84,19 @@ const run = function (password) {
 if (!fs.existsSync('wallet.txt')) {
     console.log("wallet is not created. please create or import your wallet");
 }else{
-    let lineReader = readLine.createInterface({
-        input: fs.createReadStream('pass.txt')
-    });
-    lineReader.on('line', function (key) {
-        run(key);
-    }).on('close', function () {
-        //fs.unlinkSync("pass.txt");
-    });
+    if (fs.existsSync('pass.txt')) {
+        let lineReader = readLine.createInterface({
+            input: fs.createReadStream('pass.txt')
+        });
+        lineReader.on('line', function (key) {
+            run(key);
+        }).on('close', function () {
+            //fs.unlinkSync("pass.txt");
+        });
+    }else{
+        run();
+    }
+
 }
 
 
@@ -106,11 +111,12 @@ const startApp = async function(networkId,password){
         console.log("\nConnecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
-        pass = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()));
         console.log(myArgs.length);
         if(myArgs.length > 1){
             pass = myArgs[0];
             readFromDb = myArgs[1];
+        }else{
+            pass = web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()));
         }
         readFromDb = readFromDb !== "false";
         let key = web3.utils.toBN(web3.utils.toHex(pass)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
