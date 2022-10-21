@@ -95,24 +95,33 @@ var networkConfig = [
         approveLimit: 500000,
         usdSymbol: "USDT",
         blockInterval: 4,
-        orderContractCreationBlock:32884039,
+        minOrderValue:1,
+        orderContractCreationBlock:34492514,
         orderBlockScanInterval : 10000,
-        logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/info/logo.png",
-        orderAddress: "0x05bd0Ab6c24b47BcB1623Ef71b770A779778D61C",
+        logo:"https://dexhub.ml/blockchains/polygon/info/logo.png",
+        orderAddress: "0xDD22dD07AF1D28B6795903113bF505A1755B6355",
         approverAddress: "0xEBB3942AFd11418fD6f08F217D14860B023648c1",
-        infoAddress: "0x3CBBB0F5cbb6405229E9ab0b5ABe2Ed3d52Ea828",
+        infoAddress: "0xB6F12A81c7E5F0C50955A4ba7875806806590363",
         wETHAddress: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
         usdAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         scanAddress: "https://polygonscan.com/",
         scanName: "Polygonscan",
         nodeAddress: "https://polygon-rpc.com/",
-        logoPath: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/",
+        logoPath: "https://dexhub.ml/blockchains/polygon/assets/",
         swapAMMs:[
             {
                 name:"Quickswap",
                 address:"0xa5E0829CaCEd8fFDD4De3c43696c57F7D7A678ff",
+                factory:"0x5757371414417b8c6caad45baef941abc7d3ab32",
                 site:"https://quickswap.exchange/#/swap?outputCurrency=",
-                logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/polygon/assets/0x831753DD7087CaC61aB5644b308642cc1c33Dc13/logo.png"
+                logo:"https://dexhub.ml/blockchains/polygon/assets/0x831753dd7087cac61ab5644b308642cc1c33dc13/logo.png"
+            }, {
+                name:"UniswapV3",
+                address:"0xE592427A0AEce92De3Edee1F18E0157C05861564",
+                factory:"0x1f98431c8ad98523631ae4a59f267346ea31f984",
+                site:"https://quickswap.exchange/#/swap?outputCurrency=",
+                logo:"https://dexhub.ml/blockchains/polygon/assets/0x831753dd7087cac61ab5644b308642cc1c33dc13/logo.png",
+                isV3:true
             }
         ],
         pairList: [
@@ -121,24 +130,25 @@ var networkConfig = [
                 address:'0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
                 decimal:18
             }, {
+                symbol:'USDC',
+                address:'0x2791bca1f2de4661ed88a30c99a7a9449aa84174',
+                decimal:6
+            },{
                 symbol:'USDT',
                 address:'0xc2132d05d31c914a87c6611c10748aeb04b58e8f',
                 decimal:6
             }, {
                 symbol:'WETH',
-                address:'0x7ceB23fD6bC0adD59E62ac25578270cFf1b9f619',
+                address:'0x7ceb23fd6bc0add59e62ac25578270cff1b9f619',
                 decimal:18
             }, {
-                symbol:'USDC',
-                address:'0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',
-                decimal:6
-            },{
                 symbol:'WMATIC',
                 address:'0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270',
                 decimal:18
             }
         ]
-    }, {
+    },
+    {
         id: "43114",
         name: "Avalanche",
         symbol: "AVAX",
