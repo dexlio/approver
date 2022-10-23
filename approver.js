@@ -718,7 +718,6 @@ let getSellOrders = async function (sellOrders) {
                 let seller = sellOrders[i].taker;
                 let token = sellOrders[i].pair;
                 let order = results2[i];
-                console.log(order);
                 let persistedOrder = activeSellOrderMap.get(token + "_" + seller);
                 persistedOrder = persistedOrder ? persistedOrder : sellOrderMap.get(token + "_" + seller);
                 if (((order.orderId % groupCount) === (processorNumber % groupCount))

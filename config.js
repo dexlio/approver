@@ -99,7 +99,7 @@ var networkConfig = [
         orderContractCreationBlock:34492514,
         orderBlockScanInterval : 10000,
         logo:"https://dexhub.ml/blockchains/polygon/info/logo.png",
-        orderAddress: "0xDD22dD07AF1D28B6795903113bF505A1755B6355",
+        orderAddress: "0xE0004183c30B632648Ec09A46E67a0d34D7F951D",
         approverAddress: "0xEBB3942AFd11418fD6f08F217D14860B023648c1",
         infoAddress: "0xB6F12A81c7E5F0C50955A4ba7875806806590363",
         wETHAddress: "0x0d500b1d8e8ef31e21c99d1db9a6444d3adf1270",
