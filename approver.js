@@ -1065,12 +1065,10 @@ let getPath = function (token, order, buy) {
 
 let checkConditions = function (order, tokenInfo) {
     if (tokenInfo && tokenInfo.price) {
-        console.log(tokenInfo.price);
-        console.log(order.price);
-        if (order.mod == 1 || order.mod == 3) {
+        if (order.mod == 1) {
             return (order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== -1 && compareNumbers(tokenInfo.reserve.wETHReserve, 0) === 1)
                 || (!order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== 1);
-        } else if (order.mod == 2 || order.mod == 4) {
+        } else if (order.mod == 2) {
             return (order.up && compareNumbers(order.price, tokenInfo.reserve.tokenReserve) !== -1 && compareNumbers(tokenInfo.reserve.tokenReserve, 0) === 1)
                 || (!order.up && compareNumbers(order.price, tokenInfo.reserve.tokenReserve) !== 1);
         } else {
