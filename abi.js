@@ -20,109 +20,6 @@ var orderProviderAbi = [
     {
         "inputs": [
             {
-                "internalType": "address payable",
-                "name": "_consumerAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_uniswapAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_mainLiqAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "_usdAddress",
-                "type": "address"
-            },
-            {
-                "internalType": "bool",
-                "name": "isV3",
-                "type": "bool"
-            },
-            {
-                "internalType": "address",
-                "name": "_factoryAddr",
-                "type": "address"
-            }
-        ],
-        "stateMutability": "nonpayable",
-        "type": "constructor"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint64",
-                "name": "orderId",
-                "type": "uint64"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "taker",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "address",
-                "name": "pair",
-                "type": "address"
-            },
-            {
-                "indexed": false,
-                "internalType": "bool",
-                "name": "isBuy",
-                "type": "bool"
-            }
-        ],
-        "name": "CreateOrder",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": false,
-                "internalType": "uint64",
-                "name": "orderId",
-                "type": "uint64"
-            }
-        ],
-        "name": "Order",
-        "type": "event"
-    },
-    {
-        "anonymous": false,
-        "inputs": [
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "previousOwner",
-                "type": "address"
-            },
-            {
-                "indexed": true,
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-            }
-        ],
-        "name": "OwnershipTransferred",
-        "type": "event"
-    },
-    {
-        "stateMutability": "payable",
-        "type": "fallback"
-    },
-    {
-        "inputs": [
-            {
                 "internalType": "address",
                 "name": "pairAddress",
                 "type": "address"
@@ -406,6 +303,330 @@ var orderProviderAbi = [
         "outputs": [],
         "stateMutability": "payable",
         "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address payable",
+                "name": "_consumerAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_uniswapAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_mainLiqAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "_usdAddress",
+                "type": "address"
+            },
+            {
+                "internalType": "bool",
+                "name": "isV3",
+                "type": "bool"
+            },
+            {
+                "internalType": "address",
+                "name": "_factoryAddr",
+                "type": "address"
+            }
+        ],
+        "stateMutability": "nonpayable",
+        "type": "constructor"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint64",
+                "name": "orderId",
+                "type": "uint64"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "taker",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "address",
+                "name": "pair",
+                "type": "address"
+            },
+            {
+                "indexed": false,
+                "internalType": "bool",
+                "name": "isBuy",
+                "type": "bool"
+            }
+        ],
+        "name": "CreateOrder",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint64",
+                "name": "orderId",
+                "type": "uint64"
+            }
+        ],
+        "name": "Order",
+        "type": "event"
+    },
+    {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "previousOwner",
+                "type": "address"
+            },
+            {
+                "indexed": true,
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "OwnershipTransferred",
+        "type": "event"
+    },
+    {
+        "inputs": [],
+        "name": "renounceOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "token",
+                "type": "address"
+            },
+            {
+                "internalType": "address",
+                "name": "seller",
+                "type": "address"
+            },
+            {
+                "internalType": "address[]",
+                "name": "path",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint32",
+                "name": "pairId",
+                "type": "uint32"
+            }
+        ],
+        "name": "sellOrderExecute",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_approverAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setApproverContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_approverInc",
+                "type": "uint256"
+            }
+        ],
+        "name": "setApproverInc",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address payable",
+                "name": "_consumerAddress",
+                "type": "address"
+            }
+        ],
+        "name": "setConsumer",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_expireTime",
+                "type": "uint256"
+            }
+        ],
+        "name": "setExpireTime",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_feeRatio",
+                "type": "uint256"
+            }
+        ],
+        "name": "setFeeRatio",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_gasPrice",
+                "type": "uint256"
+            }
+        ],
+        "name": "setGasPrice",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_groupMemberCount",
+                "type": "uint256"
+            }
+        ],
+        "name": "setGroupMemberCount",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_minGasCount",
+                "type": "uint256"
+            }
+        ],
+        "name": "setMinGasCount",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_orderLimit",
+                "type": "uint256"
+            }
+        ],
+        "name": "setOrderLimit",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_stakeHolderRatio",
+                "type": "uint256"
+            }
+        ],
+        "name": "setStakeHolderRatio",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_timeInterval",
+                "type": "uint256"
+            }
+        ],
+        "name": "setTimeInterval",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "_infoAddr",
+                "type": "address"
+            }
+        ],
+        "name": "setTokenInfoContract",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "_transactionFee",
+                "type": "uint256"
+            }
+        ],
+        "name": "setTransactionFee",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "address",
+                "name": "newOwner",
+                "type": "address"
+            }
+        ],
+        "name": "transferOwnership",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "fallback"
+    },
+    {
+        "stateMutability": "payable",
+        "type": "receive"
     },
     {
         "inputs": [],
@@ -721,214 +942,6 @@ var orderProviderAbi = [
         ],
         "stateMutability": "view",
         "type": "function"
-    },
-    {
-        "inputs": [],
-        "name": "renounceOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "token",
-                "type": "address"
-            },
-            {
-                "internalType": "address",
-                "name": "seller",
-                "type": "address"
-            },
-            {
-                "internalType": "address[]",
-                "name": "path",
-                "type": "address[]"
-            },
-            {
-                "internalType": "uint32",
-                "name": "pairId",
-                "type": "uint32"
-            }
-        ],
-        "name": "sellOrderExecute",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_approverAddr",
-                "type": "address"
-            }
-        ],
-        "name": "setApproverContract",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_approverInc",
-                "type": "uint256"
-            }
-        ],
-        "name": "setApproverInc",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address payable",
-                "name": "_consumerAddress",
-                "type": "address"
-            }
-        ],
-        "name": "setConsumer",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_expireTime",
-                "type": "uint256"
-            }
-        ],
-        "name": "setExpireTime",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_feeRatio",
-                "type": "uint256"
-            }
-        ],
-        "name": "setFeeRatio",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_groupMemberCount",
-                "type": "uint256"
-            }
-        ],
-        "name": "setGroupMemberCount",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_minGasCount",
-                "type": "uint256"
-            }
-        ],
-        "name": "setMinGasCount",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_orderLimit",
-                "type": "uint256"
-            }
-        ],
-        "name": "setOrderLimit",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_stakeHolderRatio",
-                "type": "uint256"
-            }
-        ],
-        "name": "setStakeHolderRatio",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_timeInterval",
-                "type": "uint256"
-            }
-        ],
-        "name": "setTimeInterval",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "_infoAddr",
-                "type": "address"
-            }
-        ],
-        "name": "setTokenInfoContract",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "uint256",
-                "name": "_transactionFee",
-                "type": "uint256"
-            }
-        ],
-        "name": "setTransactionFee",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "inputs": [
-            {
-                "internalType": "address",
-                "name": "newOwner",
-                "type": "address"
-            }
-        ],
-        "name": "transferOwnership",
-        "outputs": [],
-        "stateMutability": "nonpayable",
-        "type": "function"
-    },
-    {
-        "stateMutability": "payable",
-        "type": "receive"
     }
 ];
 
