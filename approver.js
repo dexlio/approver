@@ -30,6 +30,7 @@ let mail;
 let web3;
 let network;
 let gasPrice;
+let correctTime;
 
 let tokenMap = new Map();
 let tokenInfoMap = guavaCache({expiry: '10m', maxItems: 1000});
@@ -452,14 +453,19 @@ const updateTokenKeys = function (isBuy) {
             let order = buyOrderMap.get(id);
             let token = order.token;
             let key = initTokenInfoKey(order, token);
-            tokenKeys.set(key, key);
+            if (key) {
+                tokenKeys.set(key, key);
+            }
+
         }
     } else {
         for (const id of sellOrderMap.keys()) {
             let order = sellOrderMap.get(id);
             let token = order.token;
             let key = initTokenInfoKey(order, token);
-            tokenKeys.set(key, key);
+            if (key) {
+                tokenKeys.set(key, key);
+            }
         }
     }
 
@@ -649,7 +655,9 @@ let getBuyOrders = async function (buyOrders) {
                 persistedOrder = persistedOrder ? persistedOrder : buyOrderMap.get(token + "_" + buyer);
                 if (((order.orderId % groupCount) === (processorNumber % groupCount)) && order.pending && !order.canceled && order.price > 0) {
                     let key = initTokenInfoKey(order, token);
-                    tokenKeys.set(key, key);
+                    if (key) {
+                        tokenKeys.set(key, key);
+                    }
                     let o = {
                         price: order.price,
                         value: order.value,
@@ -718,8 +726,9 @@ let getSellOrders = async function (sellOrders) {
                 if (((order.orderId % groupCount) === (processorNumber % groupCount))
                     && order.pending && !order.canceled) {
                     let key = initTokenInfoKey(results2[i], token);
-                    console.log("order "+ order.orderId + " " + key);
-                    tokenKeys.set(key, key);
+                    if (key) {
+                        tokenKeys.set(key, key);
+                    }
                     let o = {
                         price: order.price,
                         value: order.value,
@@ -778,8 +787,11 @@ let initTokenInfoKey = function (order, token) {
     let swapId = order.swapId;
     let poolFee = order.poolFee;
     let tokenAddr = pairId == 0 ? token : xorAddress(token, network.pairList[pairId].address);
-    console.log("token info key " + (tokenAddr + "_" + pairId + "_" + liqPairId + "_" + swapId + "_" + poolFee));
-    return tokenAddr + "_" + pairId + "_" + liqPairId + "_" + swapId + "_" + poolFee;
+    if (!network.swapAMMs[swapId].isV3 && order.poolFee != 0) {
+        return null;
+    } else {
+        return tokenAddr + "_" + pairId + "_" + liqPairId + "_" + swapId + "_" + poolFee;
+    }
 };
 
 let checkTokenInfos = async function () {
@@ -787,8 +799,6 @@ let checkTokenInfos = async function () {
         let tokenInfoPromises = [];
         let tokenKeyMap = new Map();
         let j = 0;
-        console.log("token keys");
-        console.log(tokenKeys);
         for (let key of tokenKeys.keys()) {
             let params = key.split("_");
             let token = params[0];
@@ -835,35 +845,36 @@ let checkTokenInfos = async function () {
 let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
         let currentTime = parseInt(lastBlockTime % timeInterval);
-        let correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / network.blockInterval));
-        if (isActive || correctTime) {
-            for (let key of orderMap.keys()) {
-                let order = orderMap.get(key);
-                if (order.checked) {
-                    let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
-                    let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId + "_" + order.poolFee;
-                    let tokenInfo = tokenInfoMap.get(tokenKey);
-                    let checkTokenInfo = (tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount)) || order.newOrder || (!order.correctTime && correctTime);
-                    if (order.minExpect) {
-                        order.minExpect = !checkTokenInfo;
-                    } else {
-                        checkTokenInfo = true;
-                    }
-                    if (tokenInfo) {
-                        order.tokenInfoCount = tokenInfo.count;
-                    }
-                    order.newOrder = false;
-                    if (checkTokenInfo && checkConditions(order, tokenInfo) || order.mod > 2) {
+        correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / network.blockInterval));
+        for (let key of orderMap.keys()) {
+            let order = orderMap.get(key);
+            if (order.checked) {
+                let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
+                let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId + "_" + order.poolFee;
+                let tokenInfo = tokenInfoMap.get(tokenKey);
+                if (order.minExpect) {
+                    let checkTokenInfo = (tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount));
+                    order.minExpect = !checkTokenInfo;
+                }
+                if (tokenInfo) {
+                    order.tokenInfoCount = tokenInfo.count;
+                }
+                if ((checkConditions(order, tokenInfo) || order.mod > 2)) {
+                    if (isActive || (order.willExecute && correctTime)) {
                         if (isBuy) {
-                            await executeBuyOrder(order, tokenAddr,isActive);
+                            await executeBuyOrder(order, tokenAddr, isActive);
                         } else {
-                            await executeSellOrder(order, tokenAddr,isActive);
+                            await executeSellOrder(order, tokenAddr, isActive);
+                        }
+                    } else {
+                        if(!correctTime){
+                            order.willExecute = true;
                         }
                     }
-                    order.correctTime = true;
+                }else{
+                    order.willExecute = false;
                 }
             }
-
         }
     } catch (e) {
         console.log("check orders error");
@@ -872,7 +883,7 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
 };
 
 
-let executeBuyOrder = async function (order, token,isActive) {
+let executeBuyOrder = async function (order, token, isActive) {
     try {
         if (!order.executed && !order.canceled && !order.pending && !order.minExpect) {
             tx.gasPrice = isActive ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
@@ -880,12 +891,12 @@ let executeBuyOrder = async function (order, token,isActive) {
                 order.pending = true;
                 let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
                 console.log("estimate " + result);
-                if((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
+                if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
                     console.log("buy order success order id : " + order.id);
                     order.executed = true;
                     order.pending = false;
-                }else {
+                } else {
                     console.log("high gas order id 1 : " + order.id);
                 }
             } else {
@@ -904,7 +915,7 @@ let executeBuyOrder = async function (order, token,isActive) {
 };
 
 
-let executeSellOrder = async function (order, token,isActive) {
+let executeSellOrder = async function (order, token, isActive) {
     try {
         if (!order.executed && !order.canceled && !order.pending && !order.minExpect) {
             tx.gasPrice = isActive ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
@@ -917,8 +928,8 @@ let executeSellOrder = async function (order, token,isActive) {
                     console.log("sell order success order id : " + order.id);
                     order.executed = true;
                     order.pending = false;
-                }else {
-                   console.log("high gas order id 1 : " + order.id);
+                } else {
+                    console.log("high gas order id 1 : " + order.id);
                 }
             } else {
                 //console.log("high gas order id 2 : " + order.id);
@@ -993,7 +1004,7 @@ let checkBlock = async function () {
 let checkGasPrice = async function () {
     web3.eth.getGasPrice(function (e, r) {
         console.log("gas price : " + r);
-        if(r < gasPrice){
+        if (r < gasPrice) {
             gasPriceChanged = true;
         }
         gasPrice = r;
