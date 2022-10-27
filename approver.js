@@ -22,7 +22,6 @@ let groupCount;
 let memberId;
 let minLiquidity;
 let timeDuration;
-let lastBlockTime = 0;
 let tx;
 let publicKey;
 let privateKey;
@@ -584,14 +583,6 @@ let initApp = async function (networkId) {
             }
         }, 1000);
 
-        clearInterval(blockInterval);
-        blockInterval = setInterval(function () {
-            try {
-                checkBlock();
-            } catch (e) {
-                console.log(e);
-            }
-        }, 200);
 
         clearInterval(gasPriceInterval);
         gasPriceInterval = setInterval(function () {
@@ -841,11 +832,15 @@ let checkTokenInfos = async function () {
     }
 };
 
+let isCorrectTime = function () {
+    let lastBlockTime = parseInt(new Date().getTime() / 1000);
+    let currentTime = parseInt(lastBlockTime % timeInterval);
+    return (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / network.blockInterval));
+};
 
 let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
-        let currentTime = parseInt(lastBlockTime % timeInterval);
-        correctTime = (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / network.blockInterval));
+        correctTime = isCorrectTime();
         for (let key of orderMap.keys()) {
             let order = orderMap.get(key);
             if (order.checked) {
@@ -867,11 +862,11 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                             await executeSellOrder(order, tokenAddr, isActive);
                         }
                     } else {
-                        if(!correctTime){
+                        if (!correctTime) {
                             order.willExecute = true;
                         }
                     }
-                }else{
+                } else {
                     order.willExecute = false;
                 }
             }
@@ -891,13 +886,16 @@ let executeBuyOrder = async function (order, token, isActive) {
                 order.pending = true;
                 let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
                 console.log("estimate " + result);
-                if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
-                    await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
-                    console.log("buy order success order id : " + order.id);
-                    order.executed = true;
-                    order.pending = false;
-                } else {
-                    console.log("high gas order id 1 : " + order.id);
+                correctTime = isCorrectTime();
+                if (isActive || correctTime) {
+                    if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
+                        await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
+                        console.log("buy order success order id : " + order.id);
+                        order.executed = true;
+                        order.pending = false;
+                    } else {
+                        console.log("high gas order id 1 : " + order.id);
+                    }
                 }
             } else {
                 //console.log("high gas order id 2 : " + order.id);
@@ -923,13 +921,16 @@ let executeSellOrder = async function (order, token, isActive) {
                 order.pending = true;
                 let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
                 console.log("estimate " + result);
-                if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
-                    await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
-                    console.log("sell order success order id : " + order.id);
-                    order.executed = true;
-                    order.pending = false;
-                } else {
-                    console.log("high gas order id 1 : " + order.id);
+                correctTime = isCorrectTime();
+                if (isActive || correctTime) {
+                    if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
+                        await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
+                        console.log("sell order success order id : " + order.id);
+                        order.executed = true;
+                        order.pending = false;
+                    } else {
+                        console.log("high gas order id 1 : " + order.id);
+                    }
                 }
             } else {
                 //console.log("high gas order id 2 : " + order.id);
@@ -991,15 +992,6 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
     }
 };
 
-
-let checkBlock = async function () {
-    try {
-        lastBlockTime = parseInt(new Date().getTime() / 1000);
-    } catch (e) {
-        console.log("block error");
-        console.log(e);
-    }
-};
 
 let checkGasPrice = async function () {
     web3.eth.getGasPrice(function (e, r) {
