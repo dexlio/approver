@@ -845,6 +845,7 @@ let isBeforeTimeInterval = function () {
 
 let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
+        let lastBlockTime = parseInt(new Date().getTime() / 1000);
         correctTime = isCorrectTime();
         for (let key of orderMap.keys()) {
             let order = orderMap.get(key);
@@ -855,6 +856,9 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                 if (order.minExpect) {
                     let checkTokenInfo = (tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount));
                     order.minExpect = !checkTokenInfo;
+                    if(isActive && (order.timeoutTime < lastBlockTime)){
+                        order.minExpect = false;
+                    }
                 }
                 if (tokenInfo) {
                     order.tokenInfoCount = tokenInfo.count;
@@ -914,6 +918,7 @@ let executeBuyOrder = async function (order, token, isActive) {
             console.log("min buy expect order not executed");
         }
         order.minExpect = true;
+        order.timeoutTime = parseInt(new Date().getTime() / 1000) + (timeDuration / 2);
         order.pending = false;
         order.willExecute = false;
     }
@@ -949,6 +954,7 @@ let executeSellOrder = async function (order, token, isActive) {
             console.log("min sell expect order not executed");
         }
         order.minExpect = true;
+        order.timeoutTime = parseInt(new Date().getTime() / 1000) + (timeDuration / 2);
         order.pending = false;
         order.willExecute = false;
     }
@@ -1030,7 +1036,6 @@ let checkAllowance = async function (token, user, value, pairId) {
                 let allowance = await tokenContract.methods.allowance(user, network.orderAddress).call();
                 return web3.utils.toBN(allowance).cmp(web3.utils.toBN(value)) !== -1;
             } else {
-                console.log("no allowance");
                 return false;
             }
         }
@@ -1074,7 +1079,7 @@ let getPath = function (token, order, buy) {
 
 let checkConditions = function (order, tokenInfo) {
     if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(web3.utils.toBN(gasPrice)) !== -1) {
-        let currentDate = parseInt(new Date() / 1000);
+        let currentDate = parseInt(new Date().getTime() / 1000);
         if(order.expireDate < currentDate){
             return true;
         }else if(order.mod > 2){
