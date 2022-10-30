@@ -838,6 +838,14 @@ let isCorrectTime = function () {
     return (currentTime > timeDuration * memberId && currentTime <= timeDuration * memberId + (timeDuration / network.blockInterval));
 };
 
+let isBeforeTimeInterval = function () {
+    let lastBlockTime = parseInt(new Date().getTime() / 1000);
+    let currentTime = parseInt(lastBlockTime % timeInterval);
+    let memberTime = ((timeDuration * memberId) - timeDuration);
+    return (memberTime <= 0 ? (Number(timeInterval) + memberTime) : memberTime) > currentTime;
+};
+
+
 let checkOrders = async function (orderMap, isBuy, isActive) {
     try {
         correctTime = isCorrectTime();
@@ -862,13 +870,15 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                             await executeSellOrder(order, tokenAddr, isActive);
                         }
                     } else {
-                        if (!correctTime) {
+                        if (isBeforeTimeInterval() && !correctTime) {
                             order.willExecute = true;
                         }
                     }
                 } else {
                     order.willExecute = false;
                 }
+            }else{
+                order.willExecute = false;
             }
         }
     } catch (e) {
@@ -882,23 +892,22 @@ let executeBuyOrder = async function (order, token, isActive) {
     try {
         if (!order.executed && !order.canceled && !order.pending && !order.minExpect) {
             tx.gasPrice = isActive ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
-            if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(web3.utils.toBN(gasPrice)) !== -1) {
-                order.pending = true;
-                let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
-                console.log("estimate " + result);
-                correctTime = isCorrectTime();
-                if (isActive || correctTime) {
-                    if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
-                        await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
-                        console.log("buy order success order id : " + order.id);
-                        order.executed = true;
-                        order.pending = false;
-                    } else {
-                        console.log("high gas order id 1 : " + order.id);
-                    }
+            order.pending = true;
+            let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
+            console.log("estimate " + result);
+            correctTime = isCorrectTime();
+            if (isActive || correctTime) {
+                if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
+                    await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
+                    console.log("buy order success order id : " + order.id);
+                    order.executed = true;
+                    order.pending = false;
+                } else {
+                    console.log("high gas order id 1 : " + order.id);
+                    order.willExecute = false;
                 }
-            } else {
-                //console.log("high gas order id 2 : " + order.id);
+            }else {
+                order.willExecute = false;
             }
         }
     } catch (e) {
@@ -909,6 +918,7 @@ let executeBuyOrder = async function (order, token, isActive) {
         }
         order.minExpect = true;
         order.pending = false;
+        order.willExecute = false;
     }
 };
 
@@ -917,23 +927,22 @@ let executeSellOrder = async function (order, token, isActive) {
     try {
         if (!order.executed && !order.canceled && !order.pending && !order.minExpect) {
             tx.gasPrice = isActive ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
-            if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(web3.utils.toBN(gasPrice)) !== -1) {
-                order.pending = true;
-                let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
-                console.log("estimate " + result);
-                correctTime = isCorrectTime();
-                if (isActive || correctTime) {
-                    if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
-                        await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
-                        console.log("sell order success order id : " + order.id);
-                        order.executed = true;
-                        order.pending = false;
-                    } else {
-                        console.log("high gas order id 1 : " + order.id);
-                    }
+            order.pending = true;
+            let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
+            console.log("estimate " + result);
+            correctTime = isCorrectTime();
+            if (isActive || correctTime) {
+                if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
+                    await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
+                    console.log("sell order success order id : " + order.id);
+                    order.executed = true;
+                    order.pending = false;
+                } else {
+                    console.log("high gas order id 1 : " + order.id);
+                    order.willExecute = false;
                 }
-            } else {
-                //console.log("high gas order id 2 : " + order.id);
+            }else{
+                order.willExecute = false;
             }
         }
     } catch (e) {
@@ -944,6 +953,7 @@ let executeSellOrder = async function (order, token, isActive) {
         }
         order.minExpect = true;
         order.pending = false;
+        order.willExecute = false;
     }
 };
 
@@ -1066,19 +1076,23 @@ let getPath = function (token, order, buy) {
 };
 
 let checkConditions = function (order, tokenInfo) {
-    if (tokenInfo && tokenInfo.price) {
-        //console.log("order id  "  + order.id + " price : " + order.price + " price 2 " + tokenInfo.price);
-        if (order.mod == 1) {
-            return (order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== -1 && compareNumbers(tokenInfo.reserve.wETHReserve, 0) === 1)
-                || (!order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== 1);
-        } else if (order.mod == 2) {
-            return (order.up && compareNumbers(order.price, tokenInfo.reserve.tokenReserve) !== -1 && compareNumbers(tokenInfo.reserve.tokenReserve, 0) === 1)
-                || (!order.up && compareNumbers(order.price, tokenInfo.reserve.tokenReserve) !== 1);
+    if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(web3.utils.toBN(gasPrice)) !== -1) {
+        if (tokenInfo && tokenInfo.price) {
+            //console.log("order id  "  + order.id + " price : " + order.price + " price 2 " + tokenInfo.price);
+            if (order.mod == 1) {
+                return (order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== -1 && compareNumbers(tokenInfo.reserve.wETHReserve, 0) === 1)
+                    || (!order.up && compareNumbers(order.price, tokenInfo.reserve.wETHReserve) !== 1);
+            } else if (order.mod == 2) {
+                return (order.up && compareNumbers(order.price, tokenInfo.reserve.tokenReserve) !== -1 && compareNumbers(tokenInfo.reserve.tokenReserve, 0) === 1)
+                    || (!order.up && compareNumbers(order.price, tokenInfo.reserve.tokenReserve) !== 1);
+            } else {
+                return (order.up && compareNumbers(order.price, tokenInfo.price) !== -1 && compareNumbers(tokenInfo.price, 0) === 1)
+                    || (!order.up && compareNumbers(order.price, tokenInfo.price) !== 1);
+            }
         } else {
-            return (order.up && compareNumbers(order.price, tokenInfo.price) !== -1 && compareNumbers(tokenInfo.price, 0) === 1)
-                || (!order.up && compareNumbers(order.price, tokenInfo.price) !== 1);
+            return false;
         }
-    } else {
+    }else{
         return false;
     }
 
