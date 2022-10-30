@@ -857,6 +857,7 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                     let checkTokenInfo = (tokenInfo && tokenInfo.priceChanged && (tokenInfo.count > order.tokenInfoCount));
                     order.minExpect = !checkTokenInfo;
                     if(isActive && (order.timeoutTime < lastBlockTime)){
+                        console.log("min expect false ");
                         order.minExpect = false;
                     }
                 }
