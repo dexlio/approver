@@ -31,7 +31,7 @@ var networkConfig = [
         blockInterval: 3,
         usdSymbol:"BUSD",
         dynamicGas:false,
-        orderContractCreationBlock:21180854,
+        orderContractCreationBlock:22502674,
         orderBlockScanInterval : 5000,
         swapAddress:"0x10ed43c718714eb63d5aa57b78b54704e256024e",
         orderAddress: "0xB49359d936aa464f3C25cA5D86d2EedA9FfF6d47",
