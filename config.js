@@ -34,7 +34,7 @@ var networkConfig = [
         orderContractCreationBlock:21180854,
         orderBlockScanInterval : 5000,
         swapAddress:"0x10ed43c718714eb63d5aa57b78b54704e256024e",
-        orderAddress: "0xB69fE4Bc603D48eB6ceaD98BC1C65B4601D112ed",
+        orderAddress: "0xB49359d936aa464f3C25cA5D86d2EedA9FfF6d47",
         wETHAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
         approverAddress: "0x4F83C5F3b9853bfbbeBC997d9982ab7677032A5c",
         infoAddress: "0x30eaB84e2B69BcD89C58174743984EC52aC1dA3c",
