@@ -47,17 +47,20 @@ var networkConfig = [
                 name:"PancakeSwapV2",
                 address:"0x10ed43c718714eb63d5aa57b78b54704e256024e",
                 site:"https://pancakeswap.finance/swap?outputCurrency=",
+                factory: "0xca143ce32fe78f1f7019d7d551a6402fc5350c73",
                 logo:"https://raw.githubusercontent.com/trustwallet/assets/master/dapps/exchange.pancakeswap.finance.png"
             },{
                 name:"ApeSwap",
                 address:"0xcF0feBd3f17CEf5b47b0cD257aCf6025c5BFf3b7",
                 site:"https://apeswap.finance/swap?outputCurrency=",
+                factory: "0x0841bd0b734e4f5853f0dd8d7ea041c241fb0da6",
                 logo:"https://raw.githubusercontent.com/trustwallet/assets/master/dapps/apeswap.finance.png"
             },
             {
                 name:"BiSwap",
                 address:"0x3a6d8cA21D1CF76F653A67577FA0D27453350dD8",
                 site:"https://exchange.biswap.org/swap?outputCurrency=",
+                factory: "0x858e3312ed3a876947ea49d572a7c42de08af7ee",
                 logo:"https://biswap.org/logo.png"
             }
         ],
