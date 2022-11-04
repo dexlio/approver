@@ -37,7 +37,7 @@ var networkConfig = [
         orderAddress: "0xB49359d936aa464f3C25cA5D86d2EedA9FfF6d47",
         wETHAddress: "0xbb4CdB9CBd36B01bD1cBaEBF2De08d9173bc095c",
         approverAddress: "0x4F83C5F3b9853bfbbeBC997d9982ab7677032A5c",
-        infoAddress: "0x30eaB84e2B69BcD89C58174743984EC52aC1dA3c",
+        infoAddress: "0x6386A35FC1ceec502564766a9F26E7b9A6139a85",
         usdAddress:"0xe9e7cea3dedca5984780bafc599bd69add087d56",
         scanAddress:"https://bscscan.com/",
         nodeAddress:"https://bsc-dataseed.binance.org/",
