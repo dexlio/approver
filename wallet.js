@@ -31,7 +31,8 @@ var read = function (command) {
 };
 
 const walletCommands = function (rl,command) {
-    rl.question('Which network you want to run? ? Options : \n 0 : Binance Smart Chain \n 1 : Polygon Matic \n 2 : Avalanche-C \n', function (network) {
+    rl.question('Which network you want to run? ? Options : \n 0 : Binance Smart Chain \n 1 : Polygon Matic \n 2 : Avalanche-C \n ' +
+        '3 : Ethereum \n 4 : Arbitrum \n 6 : Fantom \n 7 : Celo \n', function (network) {
         let networkProvider = config.config()[network].nodeAddress;
         web3 = new Web3(networkProvider);
 
