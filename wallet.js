@@ -41,13 +41,13 @@ const walletCommands = function (rl, command) {
                 if (fs.existsSync("wallet.txt")) {
                     rl.question('A wallet is already registered. Are you sure you want to add a new wallet and override the old one? :  ', function (yes) {
                         if (yes.toLowerCase() === "yes" || yes.toLowerCase() === "y") {
-                            createOrUpdateWallet(web3, rl, command);
+                            createOrUpdateWallet(web3, rl, command,network);
                         } else {
                             rl.close();
                         }
                     });
                 } else {
-                    createOrUpdateWallet(web3, rl, command);
+                    createOrUpdateWallet(web3, rl, command,network);
                 }
 
             } else if (command == 1 || command === 'get') {
