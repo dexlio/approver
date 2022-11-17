@@ -575,15 +575,3 @@ var networkConfig = [
         ]
     }
 ];
-
-getNetwork = function(id) {
-    if (id == 56) {
-        return networkConfig[0];
-    } else if(id == 137){
-        return networkConfig[1]
-    } else if (id == 97) {
-        return networkConfig[2];
-    }else {
-        return networkConfig[0];
-    }
-};

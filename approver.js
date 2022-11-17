@@ -270,8 +270,6 @@ let getOrdersFromDb = async function (networkId) {
                 let sellResult = sellResults[j];
                 await orderStore.addOrderToDB(sellResult.id, sellResult.pair, sellResult.taker, sellResult.block, false);
             }
-            //await orderStore.updateBlockToDB(0,response.data.lastBlock);
-            //lastBlock = response.data.lastBlock;
         } catch (e) {
             console.log("getmyorders error");
         }
