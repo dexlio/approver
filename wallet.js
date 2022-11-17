@@ -79,7 +79,7 @@ const walletCommands = function (rl, command) {
     });
 };
 
-const createOrUpdateWallet = function (web3, rl, command) {
+const createOrUpdateWallet = function (web3, rl, command, network) {
 
     rl.question('Type your e-mail address : ', function (mail) {
         if (validateEmail(mail)) {
@@ -96,11 +96,9 @@ const createOrUpdateWallet = function (web3, rl, command) {
                                             console.log("Private Key is:", result.privateKey);
                                             console.log("Save your private key. Don't share anybody. You can add this wallet to metamask");
                                             rl.question('\nDid you save your private key and public key? !!It is very important. If you save, type "Yes" :  ', function (yes) {
-                                                if (yes.toLowerCase() === "yes" || yes.toLowerCase() === "y") {
-                                                    write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail, "wallet.txt");
-                                                    rl.close();
-                                                    write((web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()))).toString(), "pass.txt");
-                                                }
+                                                write(cipher(result.address, key) + "," + cipher(result.privateKey, key) + "," + network + "," + mail, "wallet.txt");
+                                                rl.close();
+                                                write((web3.utils.toBN(web3.utils.toHex(password)).xor(web3.utils.toBN(config.salt2()))).toString(), "pass.txt");
                                             });
                                         });
                                     } else {
