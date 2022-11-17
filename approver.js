@@ -4,8 +4,8 @@ let serverAbi = require("./abi");
 let orderStore = require("./orderstore");
 let config = require("./config");
 let readLine = require('readline');
-var guavaCache = require('guava-cache');
-var fs = require('fs');
+const guavaCache = require('guava-cache');
+const fs = require('fs');
 
 const myArgs = process.argv.slice(2);
 let readFromDb = false;
@@ -186,18 +186,9 @@ let register = async function (networkId) {
 
 let init = async function (networkId) {
     try {
-        orderProviderContract = new web3.eth.Contract(serverAbi.orderProvider(), network.orderAddress, {
-            gasLimit: web3.utils.toHex(network.gasLimit),
-            gasPrice: web3.utils.toHex(network.gasPrice * 2)
-        });
-        approverContract = new web3.eth.Contract(serverAbi.approver(), network.approverAddress, {
-            gasLimit: web3.utils.toHex(network.gasLimit),
-            gasPrice: web3.utils.toHex(network.gasPrice * 2)
-        });
-        tokenInfoContract = new web3.eth.Contract(serverAbi.tokenInfo(), network.infoAddress, {
-            gasLimit: web3.utils.toHex(network.gasLimit),
-            gasPrice: web3.utils.toHex(network.gasPrice * 2)
-        });
+        orderProviderContract = new web3.eth.Contract(serverAbi.orderProvider(), network.orderAddress);
+        approverContract = new web3.eth.Contract(serverAbi.approver(), network.approverAddress);
+        tokenInfoContract = new web3.eth.Contract(serverAbi.tokenInfo(), network.infoAddress);
 
         let processorInfo = await approverContract.methods.getProcessor(mainWallet).call();
         if (web3.utils.toBN(processorInfo.email).cmp(web3.utils.toBN(0)) !== 1) {
@@ -1024,10 +1015,7 @@ let checkAllowance = async function (token, user, value, pairId) {
             if (tokenContractMap.get(token)) {
                 tokenContract = tokenContractMap.get(token);
             } else {
-                tokenContract = new web3.eth.Contract(serverAbi.erc20(), token, {
-                    gasLimit: web3.utils.toHex(network.gasLimit),
-                    gasPrice: web3.utils.toHex(network.gasPrice)
-                });
+                tokenContract = new web3.eth.Contract(serverAbi.erc20(), token);
                 tokenContractMap.set(token, tokenContract);
             }
             let balance = await tokenContract.methods.balanceOf(user).call();
