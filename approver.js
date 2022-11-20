@@ -888,7 +888,7 @@ let executeBuyOrder = async function (order, token, isActive) {
             let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
             correctTime = isCorrectTime();
-            if (isActive || correctTime && balanceCheck(result,balance)) {
+            if ((isActive || correctTime) && balanceCheck(result,balance)) {
                 if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
                     console.log("buy order success order id : " + order.id);
@@ -924,7 +924,7 @@ let executeSellOrder = async function (order, token, isActive) {
             let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
             correctTime = isCorrectTime();
-            if (isActive || correctTime && balanceCheck(result,balance)) {
+            if ((isActive || correctTime) && balanceCheck(result,balance)) {
                 if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
                     console.log("sell order success order id : " + order.id);
