@@ -371,6 +371,7 @@ let initOrders = async function (startBlock, isInit) {
                         }
                         await orderStore.updateBlockToDB(0, endBlock);
                         lastBlock = endBlock;
+                        console.log("init order completed");
                         await delay(1000);
                         initOrderCompleted = true;
                     });
@@ -555,7 +556,7 @@ let initApp = async function (networkId) {
         orderInterval = setInterval(function () {
             try {
                 if (networkId !== undefined && !isNaN(networkId) && initOrderCompleted) {
-                    initOrders(lastBlock);
+                    initOrders(lastBlock,false);
                 }
             } catch (e) {
                 console.log(e);
