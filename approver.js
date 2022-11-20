@@ -31,6 +31,7 @@ let web3;
 let network;
 let gasPrice;
 let correctTime;
+let balance;
 
 let tokenMap = new Map();
 let tokenInfoMap = guavaCache({expiry: '10m', maxItems: 1000});
@@ -505,6 +506,7 @@ let initProvider = async function () {
         groupMemberCount = await orderProviderContract.methods.getGroupMemberCount().call();
         timeInterval = await orderProviderContract.methods.getTimeInterval().call();
         let generalInfo = await orderProviderContract.methods.getGeneralInfo().call();
+        balance = await web3.eth.getBalance(mainWallet);
         expireTime = generalInfo._expireTime;
         processorNumber = processorInfo.processorNumber;
         processorCount = processorInfo._lastProcessorNumber;
@@ -887,7 +889,7 @@ let executeBuyOrder = async function (order, token, isActive) {
             let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
             correctTime = isCorrectTime();
-            if (isActive || correctTime) {
+            if (isActive || correctTime && balanceCheck(result,balance)) {
                 if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
                     console.log("buy order success order id : " + order.id);
@@ -923,7 +925,7 @@ let executeSellOrder = async function (order, token, isActive) {
             let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
             correctTime = isCorrectTime();
-            if (isActive || correctTime) {
+            if (isActive || correctTime && balanceCheck(result,balance)) {
                 if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
                     console.log("sell order success order id : " + order.id);
@@ -950,6 +952,15 @@ let executeSellOrder = async function (order, token, isActive) {
     }
 };
 
+
+const balanceCheck = function (estimate,balance){
+    if(web3.utils.toBN(estimate).cmp(web3.utils.toBN(balance).mul(web3.utils.toBN(65)).div(web3.utils.toBN(100))) === 1){
+        return true;
+    }else{
+        console.log("Your balance is not enough");
+        return  false;
+    }
+}
 
 let orderRemovalCheck = function () {
     try {
@@ -997,13 +1008,17 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
 
 
 let checkGasPrice = async function () {
-    web3.eth.getGasPrice(function (e, r) {
-        console.log("gas price : " + r);
-        if (r < gasPrice) {
-            gasPriceChanged = true;
-        }
-        gasPrice = r;
-    });
+    if(!network.fixedGas){
+        web3.eth.getGasPrice(function (e, r) {
+            console.log("gas price : " + r);
+            if (r < gasPrice) {
+                gasPriceChanged = true;
+            }
+            gasPrice = r;
+        });
+    }else{
+        gasPrice = network.gasPrice;
+    }
 };
 
 let checkAllowance = async function (token, user, value, pairId) {

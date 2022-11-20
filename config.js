@@ -311,6 +311,7 @@ var networkConfig = [
         minOrderValue: 0.00005,
         dynamicGas: false,
         enabled: true,
+        fixedGas:true,
         orderContractCreationTime :1667564250,
         orderContractCreationBlock: 35189739,
         orderBlockScanInterval : 2048,
