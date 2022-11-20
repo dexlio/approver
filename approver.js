@@ -884,7 +884,7 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
 let executeBuyOrder = async function (order, token, isActive) {
     try {
         if (!order.executed && !order.canceled && !order.pending && !order.minExpect) {
-            tx.gasPrice = isActive ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
+            tx.gasPrice = (isActive && !network.fixedGas) ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
             order.pending = true;
             let result = await orderProviderContract.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
@@ -920,7 +920,7 @@ let executeBuyOrder = async function (order, token, isActive) {
 let executeSellOrder = async function (order, token, isActive) {
     try {
         if (!order.executed && !order.canceled && !order.pending && !order.minExpect) {
-            tx.gasPrice = isActive ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
+            tx.gasPrice = (isActive && !network.fixedGas) ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
             order.pending = true;
             let result = await orderProviderContract.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
