@@ -181,15 +181,15 @@ var networkConfig = [
         logoPath: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/",
         swapAMMs:[
             {
-                name:"Pangolinswap",
-                address:"0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106",
-                site:"https://app.pangolin.exchange/swap?outputCurrency=",
-                logo:"https://app.pangolin.exchange/static/media/icon.adcff230.svg"
-            },{
                 name:"TraderJoe",
                 address:"0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
                 site:"https://traderjoexyz.com/trade?outputCurrency=",
                 logo:"https://traderjoexyz.com/static/media/logo.bc60f78d.png"
+            }, {
+                name:"Pangolinswap",
+                address:"0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106",
+                site:"https://app.pangolin.exchange/swap?outputCurrency=",
+                logo:"https://app.pangolin.exchange/static/media/icon.adcff230.svg"
             }
         ],
         pairList: [
@@ -201,11 +201,7 @@ var networkConfig = [
                 symbol:'USDC',
                 address:'0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E',
                 decimal:6
-            }, {
-                symbol:'USDCE',
-                address:'0xa7d7079b0fead91f3e65f86e8915cb59c1a4c664',
-                decimal:6
-            }, {
+            },  {
                 symbol:'USDT',
                 address:'0x9702230a8ea53601f5cd2dc00fdbc13d4df4a8c7',
                 decimal:6
@@ -235,7 +231,7 @@ var networkConfig = [
         orderContractCreationBlock: 15866204,
         orderBlockScanInterval : 2048,
         logo: "https://dexhub.ml/blockchains/ethereum/info/logo.png",
-        orderAddress: "0x3B712F8c085446EA7A0Ca70b9a6711a727d9cBE7",
+        orderAddress: "0x3026e7e68b52b037fd68a822e8db4271fa206ce6",
         infoAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
         approverAddress: "0x5C625F845A52bCEA092178a9cb99a99e5B35631a",
         wETHAddress: "0xc02aaa39b223fe8d0a0e5c4f27ead9083c756cc2",

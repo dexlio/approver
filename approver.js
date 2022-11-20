@@ -33,7 +33,6 @@ let gasPrice;
 let correctTime;
 let balance;
 
-let tokenMap = new Map();
 let tokenInfoMap = guavaCache({expiry: '10m', maxItems: 1000});
 let buyOrderMap = new Map();
 let activeBuyOrderMap = new Map();
@@ -50,7 +49,6 @@ let initOrderCompleted = false;
 
 let orderInterval;
 let tokenInfoInterval;
-let blockInterval;
 let gasPriceInterval;
 let checkInterval;
 let activeCheckInterval;
@@ -211,6 +209,7 @@ let init = async function (networkId) {
                 console.log("active buy order map size : " + activeBuyOrderMap.size);
                 console.log("sell order map size : " + sellOrderMap.size);
                 console.log("active sell order map size : " + activeSellOrderMap.size);
+                console.log("wallet balance : " + balance);
             } catch (e) {
                 console.log(e);
             }
@@ -954,7 +953,7 @@ let executeSellOrder = async function (order, token, isActive) {
 
 
 const balanceCheck = function (estimate,balance){
-    if(web3.utils.toBN(estimate).cmp(web3.utils.toBN(balance).mul(web3.utils.toBN(65)).div(web3.utils.toBN(100))) === 1){
+    if(web3.utils.toBN(estimate).cmp(web3.utils.toBN(balance).mul(web3.utils.toBN(65)).div(web3.utils.toBN(100))) === -1){
         return true;
     }else{
         console.log("Your balance is not enough");
