@@ -312,7 +312,7 @@ var networkConfig = [
         orderContractCreationBlock: 35189739,
         orderBlockScanInterval : 2048,
         logo: "https://dexhub.ml/blockchains/arbitrum/info/logo.png",
-        orderAddress: "0xc2b4286014e021da15eb129f887ce7c2d5b270c9",
+        orderAddress: "0xE725F84405a4e7d19C396d4C5fc6491FcF85C479",
         infoAddress: "0x5c625f845a52bcea092178a9cb99a99e5b35631a",
         approverAddress: "0xE54906aA8A6B79717055bF996181c8BcbCB9768c",
         wETHAddress: "0x82af49447d8a07e3bd95bd0d56f35241523fbab1",
