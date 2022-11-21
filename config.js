@@ -320,7 +320,7 @@ var networkConfig = [
         scanAddress: "https://arbiscan.io/",
         scanName: "Arbiscan",
         bridge:"https://bridge.arbitrum.io/",
-        nodeAddress: "https://rpc.ankr.com/arbitrum",
+        nodeAddress: "https://arb1.arbitrum.io/rpc",
         logoPath: "https://dexhub.ml/blockchains/arbitrum/assets/",
         swapAMMs: [
             {
