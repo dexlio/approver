@@ -863,7 +863,7 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
                 if (tokenInfo) {
                     order.tokenInfoCount = tokenInfo.count;
                 }
-                if ((checkConditions(order, tokenInfo))) {
+                if ((checkConditions(order, tokenInfo,isActive))) {
                     if (isActive || (order.willExecute && correctTime)) {
                         if (isBuy) {
                             await executeBuyOrder(order, tokenAddr, isActive);
@@ -1093,8 +1093,9 @@ let getPath = function (token, order, buy) {
     }
 };
 
-let checkConditions = function (order, tokenInfo) {
-    if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(web3.utils.toBN(gasPrice)) !== -1) {
+let checkConditions = function (order, tokenInfo,isActive) {
+    let currentGasPrice = isActive ? web3.utils.toBN(gasPrice) : web3.utils.toBN(gasPrice).add(web3.utils.toBN(network.priorityGasPrice));
+    if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(currentGasPrice) !== -1) {
         let currentDate = parseInt(new Date().getTime() / 1000);
         if(order.expireDate < currentDate){
             return true;
