@@ -220,7 +220,6 @@ let init = async function (networkId) {
     } catch (e) {
         console.log("Critical error init ");
         console.log(e);
-        setTimeout(initConfig, 10000);
     }
 
 
@@ -1005,13 +1004,13 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
     try {
         if (order.buyer) {
             let o = await orderProviderContract.methods.getTokenBuyOrder(order.token, order.buyer).call();
-            if (o.executed || o.canceled || o.orderId != id) {
+            if (!o.pending || o.canceled || o.orderId != id) {
                 orderMap.delete(orderKey);
             }
         } else {
             let o = await orderProviderContract.methods.getTokenSellOrder(order.token, order.seller).call();
             let tokenAddr = o.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[o.pairId].address);
-            if (o.executed || o.canceled || o.orderId != id) {
+            if (!o.pending || o.canceled || o.orderId != id) {
                 orderMap.delete(orderKey);
             }
         }
