@@ -116,9 +116,7 @@ const startApp = async function (networkId, password) {
         console.log("\nConnecting to : " + network.name);
         let networkProvider = network.nodeAddress;
         web3 = new Web3(networkProvider);
-        let mainProvider = network.transactionAddress;
-        let mainWeb3 = new Web3(mainProvider);
-        providerContractForTx = new mainWeb3.eth.Contract(serverAbi.orderProvider(), network.orderAddress);
+
 
         if (myArgs.length > 1) {
             pass = myArgs[0];
@@ -130,7 +128,10 @@ const startApp = async function (networkId, password) {
         let key = web3.utils.toBN(web3.utils.toHex(pass)).xor(web3.utils.toBN(0).xor(web3.utils.toBN(config.salt())));
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
-        await web3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
+        let mainProvider = network.transactionAddress;
+        let mainWeb3 = new Web3(mainProvider);
+        await mainWeb3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
+        providerContractForTx = new mainWeb3.eth.Contract(serverAbi.orderProvider(), network.orderAddress);
         await init(networkId);
     } catch (e) {
         console.log("start app failed");
