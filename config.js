@@ -41,7 +41,8 @@ var networkConfig = [
         infoAddress: "0x6386A35FC1ceec502564766a9F26E7b9A6139a85",
         usdAddress:"0xe9e7cea3dedca5984780bafc599bd69add087d56",
         scanAddress:"https://bscscan.com/",
-        nodeAddress:"https://bsc-dataseed.binance.org/",
+        nodeAddress: "https://rpc.ankr.com/bsc",
+        transactionAddress:"https://bsc-dataseed.binance.org/",
         swapSite:"https://pancakeswap.finance/swap?outputCurrency=",
         swapAMMs:[
             {
@@ -114,7 +115,8 @@ var networkConfig = [
         usdAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         scanAddress: "https://polygonscan.com/",
         scanName: "Polygonscan",
-        nodeAddress: "https://polygon-rpc.com/",
+        nodeAddress: "https://rpc.ankr.com/polygon",
+        transactionAddress: "https://polygon-rpc.com/",
         logoPath: "https://dexhub.ml/blockchains/polygon/assets/",
         swapAMMs:[
             {
@@ -180,7 +182,8 @@ var networkConfig = [
         usdAddress: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
         scanAddress: "https://snowtrace.io/",
         scanName: "Snowtrace",
-        nodeAddress: "https://api.avax.network/ext/bc/C/rpc",
+        nodeAddress: "https://rpc.ankr.com/avalanche-c",
+        transactionAddress: "https://api.avax.network/ext/bc/C/rpc",
         logoPath: "https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/assets/",
         swapAMMs:[
             {
@@ -244,6 +247,7 @@ var networkConfig = [
         scanName: "Etherscan",
         bridge:"https://app.multichain.org/",
         nodeAddress: "https://rpc.ankr.com/eth",
+        transactionAddress: "https://rpc.ankr.com/eth",
         logoPath: "https://dexhub.ml/blockchains/ethereum/assets/",
         swapAMMs: [
             {
@@ -326,6 +330,7 @@ var networkConfig = [
         scanName: "Arbiscan",
         bridge:"https://bridge.arbitrum.io/",
         nodeAddress: "https://arb1.arbitrum.io/rpc",
+        transactionAddress: "https://arb1.arbitrum.io/rpc",
         logoPath: "https://dexhub.ml/blockchains/arbitrum/assets/",
         swapAMMs: [
             {
@@ -401,6 +406,7 @@ var networkConfig = [
         scanName: "Optimisticscan",
         bridge:"https://app.optimism.io/bridge",
         nodeAddress: "https://rpc.ankr.com/optimism",
+        transactionAddress: "https://mainnet.optimism.io/",
         logoPath: "https://dexhub.ml/blockchains/optimism/assets/",
         swapAMMs: [
             {
@@ -465,6 +471,7 @@ var networkConfig = [
         scanName: "Ftmscan",
         bridge:"https://app.multichain.org/",
         nodeAddress: "https://rpc.ankr.com/fantom",
+        transactionAddress: "https://rpcapi.fantom.network/",
         logoPath: "https://dexhub.ml/blockchains/fantom/assets/",
         swapAMMs: [
             {
@@ -534,6 +541,7 @@ var networkConfig = [
         scanName: "Celoscan",
         bridge:"https://app.allbridge.io/",
         nodeAddress: "https://rpc.ankr.com/celo",
+        transactionAddress: "https://forno.celo.org",
         logoPath: "https://dexhub.ml/blockchains/celo/assets/",
         swapAMMs: [
             {
