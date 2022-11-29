@@ -30,6 +30,7 @@ let publicKey;
 let privateKey;
 let mail;
 let web3;
+let mainWeb3;
 let network;
 let gasPrice;
 let correctTime;
@@ -129,7 +130,7 @@ const startApp = async function (networkId, password) {
         mainWallet = completeAddress(cipher(publicKey, key), 42);
         console.log("public key : " + mainWallet);
         let mainProvider = network.transactionAddress;
-        let mainWeb3 = new Web3(mainProvider);
+        mainWeb3 = new Web3(mainProvider);
         await mainWeb3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
         providerContractForTx = new mainWeb3.eth.Contract(serverAbi.orderProvider(), network.orderAddress);
         await init(networkId);
@@ -142,7 +143,7 @@ const startApp = async function (networkId, password) {
 
 let heartBeat = async function () {
     try {
-        const signature = await web3.eth.sign(web3.utils.sha3("heartbeat"), mainWallet);
+        const signature = await mainWeb3.eth.sign(mainWeb3.utils.sha3("heartbeat"), mainWallet);
         let reqData = {
             key: approverCredential,
             sign: signature,
@@ -166,7 +167,7 @@ let heartBeat = async function () {
 
 let register = async function (networkId) {
     try {
-        const signature = await web3.eth.sign(web3.utils.sha3("register"), mainWallet);
+        const signature = await mainWeb3.eth.sign(mainWeb3.utils.sha3("register"), mainWallet);
         let reqData = {
             key: approverCredential,
             sign: signature,
@@ -232,7 +233,7 @@ let init = async function (networkId) {
 };
 
 let getOrdersFromDb = async function (networkId) {
-    const signature = await web3.eth.sign(web3.utils.sha3("orders"), mainWallet);
+    const signature = await mainWeb3.eth.sign(mainWeb3.utils.sha3("orders"), mainWallet);
     orderStore.getBlockFromDB(async function (lastBlockObj) {
         let endBlock;
         if (lastBlockObj) {
