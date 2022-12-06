@@ -189,11 +189,13 @@ var networkConfig = [
             {
                 name:"TraderJoe",
                 address:"0x60aE616a2155Ee3d9A68541Ba4544862310933d4",
+                factory:"0x9Ad6C38BE94206cA50bb0d90783181662f0Cfa10",
                 site:"https://traderjoexyz.com/trade?outputCurrency=",
                 logo:"https://traderjoexyz.com/static/media/logo.bc60f78d.png"
             }, {
                 name:"Pangolinswap",
                 address:"0xE54Ca86531e17Ef3616d22Ca28b0D458b6C89106",
+                factory: "0xefa94DE7a4656D787667C749f7E1223D71E9FD88",
                 site:"https://app.pangolin.exchange/swap?outputCurrency=",
                 logo:"https://app.pangolin.exchange/static/media/icon.adcff230.svg"
             }
