@@ -175,7 +175,7 @@ var networkConfig = [
         orderBlockScanInterval : 2048,
         priorityGasPrice : 0,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
-        orderAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
+        orderAddress: "0xa451cc89fa392a8f21f97867b3eb80d2fc6c5e72",
         approverAddress: "0xE7abB1181A8b602dCDd92dC0deF2394Dd010b74B",
         infoAddress: "0xF67428189f27E36425572EF4a715E1B6B9078153",
         wETHAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
