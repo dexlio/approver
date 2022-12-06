@@ -171,7 +171,7 @@ var networkConfig = [
         usdSymbol: "USDC",
         blockInterval: 3,
         dynamicGas:false,
-        orderContractCreationBlock: 19728811,
+        orderContractCreationBlock: 23187843,
         orderBlockScanInterval : 2048,
         priorityGasPrice : 0,
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
