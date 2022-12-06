@@ -177,7 +177,7 @@ var networkConfig = [
         logo:"https://raw.githubusercontent.com/trustwallet/assets/master/blockchains/avalanchec/info/logo.png",
         orderAddress: "0xa451cc89fa392a8f21f97867b3eb80d2fc6c5e72",
         approverAddress: "0xE7abB1181A8b602dCDd92dC0deF2394Dd010b74B",
-        infoAddress: "0xF67428189f27E36425572EF4a715E1B6B9078153",
+        infoAddress: "0x0918D95619Aeea62e4Fa6eE5D299027E159c896A",
         wETHAddress: "0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7",
         usdAddress: "0xB97EF9Ef8734C71904D8002F8b6Bc66Dd9c48a6E",
         scanAddress: "https://snowtrace.io/",
