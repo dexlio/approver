@@ -41,7 +41,7 @@ var networkConfig = [
         infoAddress: "0x6386A35FC1ceec502564766a9F26E7b9A6139a85",
         usdAddress:"0xe9e7cea3dedca5984780bafc599bd69add087d56",
         scanAddress:"https://bscscan.com/",
-        nodeAddress: "https://rpc.ankr.com/bsc",
+        nodeAddress: "https://bsc-dataseed.binance.org/",
         transactionAddress:"https://bsc-dataseed.binance.org/",
         swapSite:"https://pancakeswap.finance/swap?outputCurrency=",
         swapAMMs:[
@@ -115,8 +115,8 @@ var networkConfig = [
         usdAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         scanAddress: "https://polygonscan.com/",
         scanName: "Polygonscan",
-        nodeAddress: "https://rpc.ankr.com/polygon",
-        transactionAddress: "https://polygon-rpc.com/",
+        nodeAddress: "https://polygon-rpc.com/",
+        transactionAddress: "https://polygon-mainnet.g.alchemy.com/v2/S-VxBpDs46S1TiG3dnXJaKMMmlOpPkxd",
         logoPath: "https://dexhub.ml/blockchains/polygon/assets/",
         swapAMMs:[
             {
@@ -248,8 +248,8 @@ var networkConfig = [
         scanAddress: "https://etherscan.io/",
         scanName: "Etherscan",
         bridge:"https://app.multichain.org/",
-        nodeAddress: "https://rpc.ankr.com/eth",
-        transactionAddress: "https://rpc.ankr.com/eth",
+        nodeAddress: "https://eth-mainnet.g.alchemy.com/v2/qSZ1eqRxV_-mXQOEQ3Q3vODf0kTrYG8u",
+        transactionAddress: "https://mainnet.infura.io/v3/ebac9b5985b549d0a04930c0e0e69da4",
         logoPath: "https://dexhub.ml/blockchains/ethereum/assets/",
         swapAMMs: [
             {
