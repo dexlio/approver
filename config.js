@@ -41,7 +41,7 @@ var networkConfig = [
         infoAddress: "0x6386A35FC1ceec502564766a9F26E7b9A6139a85",
         usdAddress:"0xe9e7cea3dedca5984780bafc599bd69add087d56",
         scanAddress:"https://bscscan.com/",
-        nodeAddress: "https://bsc-dataseed.binance.org/",
+        nodeAddress: "https://bsc-dataseed2.binance.org/",
         transactionAddress:"https://bsc-dataseed.binance.org/",
         swapSite:"https://pancakeswap.finance/swap?outputCurrency=",
         swapAMMs:[
