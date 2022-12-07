@@ -609,6 +609,7 @@ var networkConfig = [
         orderContractCreationTime :1669872072,
         orderContractCreationBlock: 2414997,
         orderBlockScanInterval : 2048,
+        priorityGasPrice : 0,
         logo: "https://dexhub.ml/blockchains/moonbeam/info/logo.png",
         orderAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
         infoAddress: "0x5C625F845A52bCEA092178a9cb99a99e5B35631a",
