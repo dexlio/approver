@@ -542,7 +542,7 @@ var networkConfig = [
         scanAddress: "https://celoscan.io",
         scanName: "Celoscan",
         bridge:"https://app.allbridge.io/",
-        nodeAddress: "https://rpc.ankr.com/celo",
+        nodeAddress: "https://forno.celo.org",
         transactionAddress: "https://forno.celo.org",
         logoPath: "https://dexhub.ml/blockchains/celo/assets/",
         swapAMMs: [
