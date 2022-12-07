@@ -906,6 +906,8 @@ let executeBuyOrder = async function (order, token, isActive) {
                 tx.gasPrice = (isActive && !network.fixedGas) ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
             }
             order.pending = true;
+            console.log(order.gasPrice);
+            console.log(tx.gasPrice.toString());
             let result = await providerContractForTx.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
             console.log("estimate " + result);
             correctTime = isCorrectTime();
@@ -1105,6 +1107,7 @@ let getPath = function (token, order, buy) {
 
 let checkConditions = function (order, tokenInfo,isActive) {
     let currentGasPrice = isActive ? web3.utils.toBN(gasPrice) : web3.utils.toBN(gasPrice).add(web3.utils.toBN(network.priorityGasPrice));
+    console.log(order.gasPrice);
     if (gasPrice && web3.utils.toBN(order.gasPrice).cmp(currentGasPrice) !== -1) {
         let currentDate = parseInt(new Date().getTime() / 1000);
         if(order.expireDate < currentDate){

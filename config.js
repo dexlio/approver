@@ -523,7 +523,7 @@ var networkConfig = [
         gasPrice: 100000000,
         gasCountPrice: 10000000,
         gasLimit: 500000,
-        approveLimit: 100000,
+        approveLimit: 200000,
         usdSymbol: "CUSD",
         blockInterval: 2,
         minOrderValue: 1,
