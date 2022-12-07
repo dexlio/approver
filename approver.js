@@ -750,7 +750,8 @@ let getSellOrders = async function (sellOrders) {
                         minExpect: persistedOrder ? persistedOrder.minExpect : false,
                         newOrder: (!persistedOrder || persistedOrder.id !== order.orderId)
                     };
-                    let tokenAddr = o.pairId == 0 ? token : xorAddress(token, network.pairList[o.pairId].address);
+                    let isMain = o.pairId == 0 && !network.pairList[o.pairId].notMain;
+                    let tokenAddr = isMain ? token : xorAddress(token, network.pairList[o.pairId].address);
                     o.checked = await checkAllowance(tokenAddr, xorAddress(seller, order.oIndex), order.value, -1);
                     let trueOrder = ((o.id / groupCount) % groupMemberCount) === memberId;
                     if (trueOrder) {
@@ -779,7 +780,8 @@ let initTokenInfoKey = function (order, token) {
     let liqPairId = order.liqPairId;
     let swapId = order.swapId;
     let poolFee = order.poolFee;
-    let tokenAddr = pairId == 0 ? token : xorAddress(token, network.pairList[pairId].address);
+    let isMain = pairId == 0 && !network.pairList[pairId].notMain;
+    let tokenAddr = isMain ? token : xorAddress(token, network.pairList[pairId].address);
     if (!network.swapAMMs[swapId].isV3 && order.poolFee != 0) {
         return null;
     } else {
@@ -856,7 +858,8 @@ let checkOrders = async function (orderMap, isBuy, isActive) {
         for (let key of orderMap.keys()) {
             let order = orderMap.get(key);
             if (order.checked) {
-                let tokenAddr = order.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
+                let isMain = order.pairId == 0 && !network.pairList[order.pairId].notMain;
+                let tokenAddr = isMain ? order.token : xorAddress(order.token, network.pairList[order.pairId].address);
                 let tokenKey = tokenAddr + "_" + order.pairId + "_" + order.liqPairId + "_" + order.swapId + "_" + order.poolFee;
                 let tokenInfo = tokenInfoMap.get(tokenKey);
                 if (order.minExpect) {
@@ -1016,7 +1019,6 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
             }
         } else {
             let o = await orderProviderContract.methods.getTokenSellOrder(order.token, order.seller).call();
-            let tokenAddr = o.pairId == 0 ? order.token : xorAddress(order.token, network.pairList[o.pairId].address);
             if (!o.pending || o.canceled || o.orderId != id) {
                 orderMap.delete(orderKey);
             }
@@ -1044,7 +1046,8 @@ let checkGasPrice = async function () {
 
 let checkAllowance = async function (token, user, value, pairId) {
     try {
-        if (pairId == 0) {
+        let isMain = pairId == 0 && !network.pairList[pairId].notMain;
+        if (isMain) {
             return true;
         } else {
             let tokenContract;

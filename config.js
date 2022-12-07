@@ -530,7 +530,7 @@ var networkConfig = [
         dynamicGas: true,
         enabled: true,
         orderContractCreationTime :1668012304,
-        orderContractCreationBlock: 16083413,
+        orderContractCreationBlock: 16549473,
         orderBlockScanInterval : 2048,
         priorityGasPrice : 0,
         logo: "https://dexhub.ml/blockchains/celo/info/logo.png",
@@ -587,6 +587,81 @@ var networkConfig = [
                 address: '0x918146359264c492bd6934071c6bd31c854edbc3',
                 decimal: 18,
                 alternative: 1
+            }
+        ]
+    },
+    {
+        id: "1284",
+        name: "MoonBeam",
+        symbol: "GLMR",
+        decimal: 18,
+        usdDecimal: 18,
+        gasPrice: 125000000000,
+        gasCountPrice: 25000000000,
+        gasLimit: 500000,
+        approveLimit: 100000,
+        usdSymbol: "USDC",
+        blockInterval: 2,
+        minOrderValue: 1,
+        dynamicGas: false,
+        enabled: true,
+        orderDisabled:false,
+        orderContractCreationTime :1669872072,
+        orderContractCreationBlock: 2414997,
+        orderBlockScanInterval : 2048,
+        logo: "https://dexhub.ml/blockchains/moonbeam/info/logo.png",
+        orderAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
+        infoAddress: "0x5C625F845A52bCEA092178a9cb99a99e5B35631a",
+        approverAddress: "0xE54906aA8A6B79717055bF996181c8BcbCB9768c",
+        wETHAddress: "0xacc15dc74880c9944775448304b263d191c6077f",
+        usdAddress: "0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b",
+        scanAddress: "https://moonscan.io",
+        scanName: "Moonscan",
+        bridge:"https://app.stellaswap.com/bridge",
+        nodeAddress: "https://rpc.api.moonbeam.network",
+        transactionAddress: "https://rpc.api.moonbeam.network",
+        logoPath: "https://dexhub.ml/blockchains/moonbeam/assets/",
+        swapAMMs: [
+            {
+                name: "StellaSwap",
+                address: "0x70085a09D30D6f8C4ecF6eE10120d1847383BB57",
+                factory: "0x68a384d826d3678f78bb9fb1533c7e9577dacc0e",
+                site: "https://app.stellaswap.com/exchange/swap?outputCurrency=",
+                logo: "https://dexhub.ml/dapps/stellaswap.exchange.png",
+                isV3: false,
+                poolFee: 30
+            },{
+                name: "BeamSwap",
+                address: "0x96b244391D98B62D19aE89b1A4dCcf0fc56970C7",
+                factory: "0x985bca32293a7a496300a48081947321177a86fd",
+                site: "https://app.beamswap.io/exchange/swap?outputCurrency=",
+                logo: "https://dexhub.ml/dapps/beamswap.exchange.png",
+                isV3: false,
+                poolFee: 30
+            },
+
+        ],
+        pairList: [
+            {
+                symbol: 'GLMR',
+                address: '0xacc15dc74880c9944775448304b263d191c6077f',
+                decimal: 18,
+            }, {
+                symbol: 'USDC',
+                address: '0x818ec0a7fe18ff94269904fced6ae3dae6d6dc0b',
+                decimal: 6,
+            },{
+                symbol: 'USDT',
+                address: '0xefaeee334f0fd1712f9a8cc375f427d9cdd40d73',
+                decimal: 6,
+            },{
+                symbol: 'DAI',
+                address: '0x765277eebeca2e31912c9946eae1021199b39c61',
+                decimal: 18,
+            },{
+                symbol: 'WGLMR',
+                address: '0xacc15dc74880c9944775448304b263d191c6077f',
+                decimal: 18,
             }
         ]
     }
