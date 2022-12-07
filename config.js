@@ -41,7 +41,7 @@ var networkConfig = [
         infoAddress: "0x6386A35FC1ceec502564766a9F26E7b9A6139a85",
         usdAddress:"0xe9e7cea3dedca5984780bafc599bd69add087d56",
         scanAddress:"https://bscscan.com/",
-        nodeAddress: "https://solitary-newest-moon.bsc.discover.quiknode.pro/f34626033e447e2e9d0a63b56a53762f5f29b872/",
+        nodeAddress: "https://rpc.ankr.com/bsc",
         transactionAddress:"https://bsc-dataseed.binance.org/",
         swapSite:"https://pancakeswap.finance/swap?outputCurrency=",
         swapAMMs:[
@@ -115,8 +115,8 @@ var networkConfig = [
         usdAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         scanAddress: "https://polygonscan.com/",
         scanName: "Polygonscan",
-        nodeAddress: "https://polygon-rpc.com/",
-        transactionAddress: "https://polygon-mainnet.g.alchemy.com/v2/S-VxBpDs46S1TiG3dnXJaKMMmlOpPkxd",
+        nodeAddress: "https://polygon-mainnet.g.alchemy.com/v2/S-VxBpDs46S1TiG3dnXJaKMMmlOpPkxd",
+        transactionAddress: "https://polygon-rpc.com/",
         logoPath: "https://dexhub.ml/blockchains/polygon/assets/",
         swapAMMs:[
             {
