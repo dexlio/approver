@@ -613,7 +613,7 @@ var networkConfig = [
         orderBlockScanInterval : 2048,
         priorityGasPrice : 0,
         logo: "https://dexhub.ml/blockchains/moonbeam/info/logo.png",
-        orderAddress: "0xc2b4286014e021dA15eB129f887CE7C2D5B270c9",
+        orderAddress: "0xb2d46F30bbE16fab581f2572686DE7cd97EF403c",
         infoAddress: "0x5C625F845A52bCEA092178a9cb99a99e5B35631a",
         approverAddress: "0xE54906aA8A6B79717055bF996181c8BcbCB9768c",
         wETHAddress: "0xacc15dc74880c9944775448304b263d191c6077f",
