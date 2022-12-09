@@ -906,13 +906,15 @@ let executeBuyOrder = async function (order, token, isActive) {
                 tx.gasPrice = (isActive && !network.fixedGas) ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
             }
             order.pending = true;
-            let result = await providerContractForTx.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas(tx);
+            let result = await providerContractForTx.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).estimateGas({...tx});
             console.log("estimate " + result);
+            console.log("transaction fee " + order.transactionFee);
+            console.log("gas price " + order.gasPrice);
             correctTime = isCorrectTime();
             if ((isActive || correctTime) && balanceCheck(result,balance)) {
                 if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     tx.gas = web3.utils.toBN(result).mul(web3.utils.toBN(130).div(web3.utils.toBN(100)));
-                    await providerContractForTx.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send(tx);
+                    await providerContractForTx.methods.buyOrderExecute(token, order.buyer, getPath(token, order, true), order.pairId).send({...tx});
                     console.log("buy order success order id : " + order.id);
                     order.executed = true;
                     order.pending = false;
@@ -945,13 +947,13 @@ let executeSellOrder = async function (order, token, isActive) {
                 tx.gasPrice = (isActive && !network.fixedGas) ? (web3.utils.toBN(order.gasPrice).mul(web3.utils.toBN(101)).div(web3.utils.toBN(100))) : order.gasPrice;
             }
             order.pending = true;
-            let result = await providerContractForTx.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas(tx);
+            let result = await providerContractForTx.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).estimateGas({...tx});
             console.log("estimate " + result);
             correctTime = isCorrectTime();
             if ((isActive || correctTime) && balanceCheck(result,balance)) {
                 if ((web3.utils.toBN(result).mul(web3.utils.toBN(order.gasPrice)).mul(web3.utils.toBN(70)).div(web3.utils.toBN(100))).cmp(web3.utils.toBN(order.transactionFee)) !== 1) {
                     tx.gas = web3.utils.toBN(result).mul(web3.utils.toBN(130).div(web3.utils.toBN(100)));
-                    await providerContractForTx.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send(tx);
+                    await providerContractForTx.methods.sellOrderExecute(token, order.seller, getPath(token, order, false), order.pairId).send({...tx});
                     console.log("sell order success order id : " + order.id);
                     order.executed = true;
                     order.pending = false;
