@@ -115,7 +115,7 @@ var networkConfig = [
         usdAddress: "0xc2132d05d31c914a87c6611c10748aeb04b58e8f",
         scanAddress: "https://polygonscan.com/",
         scanName: "Polygonscan",
-        nodeAddress: "https://polygon-mainnet.g.alchemy.com/v2/S-VxBpDs46S1TiG3dnXJaKMMmlOpPkxd",
+        nodeAddress: "https://polygon-rpc.com/",
         transactionAddress: "https://polygon-rpc.com/",
         logoPath: "https://dexhub.ml/blockchains/polygon/assets/",
         swapAMMs:[
