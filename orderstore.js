@@ -5,14 +5,17 @@ let orderMap = new Map();
 let buyDb;
 let sellDb;
 let blockDb;
+let gasDb;
 
 async function init(networkId) {
     buyDb = await connectToDB("order/", "buyOrderDB" + networkId);
     sellDb = await connectToDB("order/", "sellOrderDB" + networkId);
     blockDb = await connectToDB("order/", "blockDB" + networkId);
+    gasDb = await connectToDB("order/", "gasDB" + networkId);
     await initOrderTable(true);
     await initOrderTable(false);
     await initBlockTable(blockDb);
+    await initGasTable(gasDb);
 }
 
 async function connectToDB(path, file) {
@@ -55,6 +58,16 @@ async function initBlockTable(blockDb) {
     }
 }
 
+async function initGasTable(blockDb) {
+    const createSql = 'CREATE TABLE IF NOT EXISTS gasTable (id INTEGER PRIMARY KEY,gas STRING )';
+    try {
+        await blockDb.run(createSql);
+        console.log("block table created");
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 function getOrderFromDB(id, isBuy, callback) {
     try {
 
@@ -84,6 +97,17 @@ function getBlockFromDB(callback) {
     }
 }
 
+function getGasFromDB(callback) {
+    try {
+        let selectQuery = 'SELECT * FROM gasTable where id = ? ';
+        gasDb.get(selectQuery, [0], (err, result) => {
+            callback(result);
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 async function updateBlockToDB(id, block) {
     try {
         getBlockFromDB(async function (result) {
@@ -99,6 +123,23 @@ async function updateBlockToDB(id, block) {
         console.log(e);
     }
 }
+
+async function updateGasToDB(id, gas) {
+    try {
+        getGasFromDB(async function (result) {
+            if(!result){
+                let insertQuery = 'INSERT OR IGNORE INTO gasTable (id,gas) VALUES (?,?)';
+                await gasDb.run(insertQuery, [id,gas]);
+            }else{
+                let insertQuery = 'UPDATE gasTable SET gas = ? WHERE id = ?';
+                await gasDb.run(insertQuery, [gas,id]);
+            }
+        });
+    } catch (e) {
+        console.log(e);
+    }
+}
+
 
 function getAllOrdersFromDB(startBlock, endBlock, isBuy, callback) {
     try {
@@ -149,4 +190,4 @@ let createDirectory = function (path) {
     }
 };
 
-module.exports = {init, addOrderToDB, getOrderFromDB, getAllOrdersFromDB, deleteOrderFromDB,getBlockFromDB,updateBlockToDB};
+module.exports = {init, addOrderToDB, getOrderFromDB, getAllOrdersFromDB, deleteOrderFromDB,getBlockFromDB,updateBlockToDB,getGasFromDB,updateGasToDB};

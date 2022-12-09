@@ -7,6 +7,7 @@ let readLine = require('readline');
 const guavaCache = require('guava-cache');
 const fs = require('fs');
 const net = require("net");
+const {updateGasToDB} = require("./orderstore");
 
 const myArgs = process.argv.slice(2);
 let readFromDb = false;
@@ -1034,13 +1035,22 @@ let removalCheck = async function (orderMap, order, id, orderKey) {
 
 let checkGasPrice = async function () {
     if(!network.fixedGas){
-        web3.eth.getGasPrice(function (e, r) {
-            console.log("gas price : " + r);
-            if (r < gasPrice) {
-                gasPriceChanged = true;
-            }
-            gasPrice = r;
-        });
+        if(readFromDb){
+            orderStore.getGasFromDB(async function (lastGas) {
+                console.log("gas price : " + lastGas.gas);
+                gasPrice = lastGas.gas;
+            });
+        }else {
+            web3.eth.getGasPrice(function (e, r) {
+                console.log("gas price : " + r);
+                if (r < gasPrice) {
+                    gasPriceChanged = true;
+                }
+                orderStore.updateGasToDB(0,gasPrice);
+                gasPrice = r;
+            });
+        }
+
     }else{
         gasPrice = network.gasPrice;
     }
