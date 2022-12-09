@@ -248,7 +248,7 @@ var networkConfig = [
         scanAddress: "https://etherscan.io/",
         scanName: "Etherscan",
         bridge:"https://app.multichain.org/",
-        nodeAddress: "https://eth-mainnet.g.alchemy.com/v2/qSZ1eqRxV_-mXQOEQ3Q3vODf0kTrYG8u",
+        nodeAddress: "https://rpc.ankr.com/eth",
         transactionAddress: "https://mainnet.infura.io/v3/ebac9b5985b549d0a04930c0e0e69da4",
         logoPath: "https://dexhub.ml/blockchains/ethereum/assets/",
         swapAMMs: [
