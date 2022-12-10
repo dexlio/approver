@@ -540,7 +540,8 @@ let initProvider = async function () {
                 from: mainWallet,
                 value: 0,
                 gasPrice: web3.utils.toHex(network.gasPrice),
-                gas:web3.utils.toHex(network.gasLimit)
+                gas:web3.utils.toHex(network.gasLimit),
+                gasLimit:web3.utils.toHex(network.gasLimit)
             };
         }
     } catch (e) {
