@@ -533,14 +533,14 @@ let initProvider = async function () {
             tx = {
                 from: mainWallet,
                 value: 0,
-                gasLimit: web3.utils.toHex(network.gasLimit)
+                gas:web3.utils.toHex(network.gasLimit)
             };
         }else{
             tx = {
                 from: mainWallet,
                 value: 0,
                 gasPrice: web3.utils.toHex(network.gasPrice),
-                gasLimit: web3.utils.toHex(network.gasLimit)
+                gas:web3.utils.toHex(network.gasLimit)
             };
         }
     } catch (e) {
