@@ -390,8 +390,8 @@ let initOrders = async function (startBlock, isInit) {
                 if (endBlock > startBlock) {
                     console.log("start block " + startBlock + " end block " + endBlock);
                     let events = await orderProviderContract.getPastEvents('CreateOrder', {
-                        fromBlock: startBlock - 1,
-                        toBlock: endBlock + 1,
+                        fromBlock: startBlock - network.blockDistance,
+                        toBlock: endBlock + network.blockDistance,
                     });
                     for (let j = 0; j < events.length; j++) {
                         let data = events[j].returnValues;
@@ -410,8 +410,8 @@ let initOrders = async function (startBlock, isInit) {
                     }
                     await delay(1000);
                     let deleteEvents = await orderProviderContract.getPastEvents('Order', {
-                        fromBlock: startBlock - 1,
-                        toBlock: endBlock + 1,
+                        fromBlock: startBlock - network.blockDistance,
+                        toBlock: endBlock + network.blockDistance,
                     });
                     for (let j = 0; j < deleteEvents.length; j++) {
                         let data = deleteEvents[j].returnValues;
