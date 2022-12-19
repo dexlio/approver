@@ -388,7 +388,7 @@ let initOrders = async function (startBlock, isInit) {
         } else {
             try {
                 if (endBlock > startBlock) {
-                    console.log("start block " + startBlock + " end block " + endBlock);
+                    console.log("start block " + (startBlock - network.blockDistance)+ " end block " + (endBlock + network.blockDistance));
                     let events = await orderProviderContract.getPastEvents('CreateOrder', {
                         fromBlock: startBlock - network.blockDistance,
                         toBlock: endBlock + network.blockDistance,
