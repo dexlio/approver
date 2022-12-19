@@ -394,7 +394,7 @@ var networkConfig = [
         approveLimit: 200000,
         usdSymbol: "USDC",
         blockInterval: 2,
-        blockDistance: 50,
+        blockDistance: 20,
         minOrderValue: 0.0001,
         enabled: false,
         trEnabled: false,
