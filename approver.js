@@ -475,6 +475,9 @@ let checkApproverState = async function () {
         let approverInfo = await approverContract.methods.getProcessor(mainWallet).call();
         if (approverInfo.lateCount > (lateLimit / 2)) {
             console.log("refreshing approver state");
+            if(!network.gasPriceNotNeed){
+                tx.gasPrice = gasPrice;
+            }
             await approverContract.methods.refreshApproverState().estimateGas({...tx});
             await approverContract.methods.refreshApproverState().send({...tx});
         }
