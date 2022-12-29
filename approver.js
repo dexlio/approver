@@ -13,6 +13,7 @@ const myArgs = process.argv.slice(2);
 let readFromDb = false;
 let orderProviderContract;
 let providerContractForTx;
+let approverContractForTx;
 let approverContract;
 let tokenInfoContract;
 
@@ -134,6 +135,7 @@ const startApp = async function (networkId, password) {
         mainWeb3 = new Web3(mainProvider);
         await mainWeb3.eth.accounts.wallet.add(completeAddress(cipher(privateKey, key), 66));
         providerContractForTx = new mainWeb3.eth.Contract(serverAbi.orderProvider(), network.orderAddress);
+        approverContractForTx = new mainWeb3.eth.Contract(serverAbi.approver(), network.approverAddress);
         await init(networkId);
     } catch (e) {
         console.log("start app failed");
@@ -478,8 +480,8 @@ let checkApproverState = async function () {
             if(!network.gasPriceNotNeed){
                 tx.gasPrice = gasPrice;
             }
-            await approverContract.methods.refreshApproverState().estimateGas({...tx});
-            await approverContract.methods.refreshApproverState().send({...tx});
+            await approverContractForTx.methods.refreshApproverState().estimateGas({...tx});
+            await approverContractForTx.methods.refreshApproverState().send({...tx});
         }
     } catch (e) {
         console.log(e);
