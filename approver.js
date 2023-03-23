@@ -593,7 +593,7 @@ let initApp = async function (networkId) {
             } catch (e) {
                 console.log(e);
             }
-        }, 1000);
+        }, 5000);
 
 
         clearInterval(gasPriceInterval);

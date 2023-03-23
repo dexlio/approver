@@ -314,7 +314,7 @@ var networkConfig = [
         usdDecimal: 6,
         gasPrice: 100000000,
         gasCountPrice: 10000000,
-        gasLimit: 1500000,
+        gasLimit: 3000000,
         approveLimit: 300000,
         usdSymbol: "USDC",
         blockInterval: 2,
@@ -336,7 +336,7 @@ var networkConfig = [
         scanAddress: "https://arbiscan.io/",
         scanName: "Arbiscan",
         bridge:"https://bridge.arbitrum.io/",
-        nodeAddress: "https://arb1.arbitrum.io/rpc",
+        nodeAddress: "https://rpc.ankr.com/arbitrum",
         transactionAddress: "https://arb1.arbitrum.io/rpc",
         logoPath: "https://dexhub.ml/blockchains/arbitrum/assets/",
         swapAMMs: [
